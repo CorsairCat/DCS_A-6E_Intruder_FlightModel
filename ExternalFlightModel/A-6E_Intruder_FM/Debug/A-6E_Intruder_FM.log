@@ -1,0 +1,11 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(477,5): warning MSB8004: Output 目录未以斜杠结尾。  此生成实例将添加斜杠，因为必须有这个斜杠才能正确计算 Output 目录。
+  stdafx.cpp
+  dllmain.cpp
+  A6E_FM.cpp
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\Interface\A6eInterface.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\include\Cockpit\ccParametersAPI.h(52,64): error C2664: “HMODULE GetModuleHandleW(LPCWSTR)”: 无法将参数 1 从“const char [16]”转换为“LPCWSTR”
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\include\Cockpit\ccParametersAPI.h(52,47): message : 与指向的类型无关；强制转换要求 reinterpret_cast、C 样式强制转换或函数样式强制转换
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\libloaderapi.h(269,1): message : 参见“GetModuleHandleW”的声明
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\Interface\A6eInterface.h(25,1): error C2198: “PFN_ED_COCKPIT_PARAMETER_VALUE_TO_NUMBER”: 用于调用的参数太少
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(609,34): warning C4477: “sprintf_s”: 格式字符串“%s”需要类型“char *”的参数，但可变参数 1 拥有了类型“double”

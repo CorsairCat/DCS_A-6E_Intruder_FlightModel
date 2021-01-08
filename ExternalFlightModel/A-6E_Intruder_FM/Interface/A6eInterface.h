@@ -15,14 +15,14 @@ public:
     {
         interFunctions = ed_get_cockpit_param_api();
     }
-    ~A6eInterface();
+    //~A6eInterface();
     // 用双浮点读取parameter值
     double getParamValue(char * parameterName)
     {
         void* tempParamter = NULL;
         tempParamter = interFunctions.pfn_ed_cockpit_get_parameter_handle(parameterName);
         double resultValue;
-        interFunctions.pfn_ed_cockpit_parameter_value_to_number(tempParamter, resultValue);
+        interFunctions.pfn_ed_cockpit_parameter_value_to_number(tempParamter, resultValue, false);
         return resultValue;
     }
     // 写入浮点数据

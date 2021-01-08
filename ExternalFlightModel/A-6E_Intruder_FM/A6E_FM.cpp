@@ -513,7 +513,7 @@ double ed_fm_get_external_fuel ()
 // 获取加油量更新
 double ed_fm_refueling_add_fuel(double fuel)
 {
-
+	return 0;
 }
 
 // 绘制动画函数
@@ -606,7 +606,7 @@ bool ed_fm_enable_debug_info()
 
 size_t ed_fm_debug_watch(int level, char *buffer, size_t maxlen)
 {
-	return  sprintf_s(buffer,maxlen,"TempParameter: %s", A6E::Interface.getParamValue("NoseWPOS_IND"));;
+	return  sprintf_s(buffer,maxlen,"TempParameter: %.2f", A6E::Interface.getParamValue("NoseWPOS_IND"));;
 }
 
 // 维修和损伤
@@ -622,17 +622,17 @@ void ed_fm_repair()
 
 bool ed_fm_need_to_be_repair()
 {
-
+	return false;
 }
 
 // 这俩主要暂时给航母起飞用
 bool ed_fm_pop_simulation_event (ed_fm_simulation_event & out)
 {
-
+	return true;
 }
 
 	// bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in) // same as pop . but function direction is reversed -> DCS will call it for your FM when ingame event occurs
 bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in)
 {
-
+	return true;
 }
