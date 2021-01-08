@@ -166,7 +166,9 @@ extern "C"
 	/*
 		get external fuel volume 
 	*/
-	A6E_FM_API double ed_fm_get_external_fuel ();
+	A6E_FM_API double ed_fm_get_external_fuel();
+
+	A6E_FM_API double ed_fm_refueling_add_fuel(double fuel);
 	
 	A6E_FM_API void ed_fm_set_draw_args (EdDrawArgument * drawargs,size_t size);
 	A6E_FM_API void ed_fm_configure		(const char * cfg_path);
@@ -189,4 +191,16 @@ extern "C"
 	A6E_FM_API void ed_fm_on_damage(int Element, double element_integrity_factor);
 	A6E_FM_API void ed_fm_repair();
 	A6E_FM_API bool ed_fm_need_to_be_repair();
+
+	// shake of head simulation
+	A6E_FM_API double ed_fm_get_shake_amplitude();
+
+	A6E_FM_API bool ed_fm_pop_simulation_event (ed_fm_simulation_event & out);
+
+	// bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in) // same as pop . but function direction is reversed -> DCS will call it for your FM when ingame event occurs
+	A6E_FM_API bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in);
+
+	// 传递params， 似乎， 需要测试
+	A6E_FM_API void ed_fm_set_property_string(const char * property_name,const char * value);
+	A6E_FM_API void ed_fm_set_property_numeric(const char * property_name,float value);
 };

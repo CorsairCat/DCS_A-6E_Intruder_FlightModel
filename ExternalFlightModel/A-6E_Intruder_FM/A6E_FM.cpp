@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string>
 
-
+// template 给的参考算法
 Vec3	common_moment;
 Vec3	common_force;
 Vec3    center_of_gravity;
@@ -22,6 +22,7 @@ double  atmosphere_density = 0;
 double  aoa = 0;
 double  speed_of_sound = 320;
 
+float 	test_ptn_521 = 0;
 
 double mach_table[] = {
 	0,	
@@ -165,7 +166,6 @@ void add_local_force(const Vec3 & Force, const Vec3 & Force_pos)
 	common_moment.z += delta_moment.z;
 }
 
-
 void simulate_fuel_consumption(double dt)
 {
 	fuel_consumption_since_last_time =  10 * throttle * dt; //10 kg persecond
@@ -173,7 +173,21 @@ void simulate_fuel_consumption(double dt)
 		fuel_consumption_since_last_time = internal_fuel;
 	internal_fuel -= fuel_consumption_since_last_time;
 }
+// 到这之前都是一个简单的算法来算力，是一个参考
 
+// 这里开始预定义的dll函数，就是默认DCS的核心会调用的
+
+/*	function of force source in body axis 
+	x,y,z			  - force components in body coordinate system 不同方向上的力
+	pos_x,pos_y,pos_z - position of force source in body coordinate system 合力作用位置
+
+	body coordinate system system is always X - positive forward ,
+											Y - positive up,
+											Z - positive to right 
+	轴向是反的。Z轴为横向的，Y轴为纵向的
+*/
+
+// 每帧之后运算，用来让气动模型把当前的作用力(可能是所有力的矢量和)和重心位置（是合力位置，F16 模组描述不明确， 参考前面的英文提示）传递给dcs
 void ed_fm_add_local_force(double & x,double &y,double &z,double & pos_x,double & pos_y,double & pos_z)
 {
 	x = common_force.x;
@@ -183,10 +197,29 @@ void ed_fm_add_local_force(double & x,double &y,double &z,double & pos_x,double 
 	pos_y = center_of_gravity.y;
 	pos_z = center_of_gravity.z;
 }
-
+// 全局力，不知道是啥
 void ed_fm_add_global_force(double & x,double &y,double &z,double & pos_x,double & pos_y,double & pos_z)
 {
 
+}
+
+// same but in component form , return value bool : function will be called until return value is true
+// 与上面两个add force 相同的函数，但是用的是“组件形式”（不知道是哪里的术语），函数会保持请求直到返回真（？？？16为啥返回的否
+bool ed_fm_add_local_force_component(double & x,double &y,double &z,double & pos_x,double & pos_y,double & pos_z)
+{
+	return false;
+}
+bool ed_fm_add_global_force_component(double & x,double &y,double &z,double & pos_x,double & pos_y,double & pos_z)
+{
+	return false;
+}
+
+// 反馈力矩信息，决定pitch的，全局力矩还是不知道是啥用的
+void ed_fm_add_local_moment(double & x,double &y,double &z)
+{
+	x = common_moment.x;
+	y = common_moment.y;
+	z = common_moment.z;
 }
 
 void ed_fm_add_global_moment(double & x,double &y,double &z)
@@ -194,12 +227,19 @@ void ed_fm_add_global_moment(double & x,double &y,double &z)
 
 }
 
-void ed_fm_add_local_moment(double & x,double &y,double &z)
+// 一样的component模式，直接turn false完事
+bool ed_fm_add_local_moment_component(double & x,double &y,double &z)
 {
-	x = common_moment.x;
-	y = common_moment.y;
-	z = common_moment.z;
+	return false;
 }
+
+bool ed_fm_add_global_moment_component(double & x,double &y,double &z)
+{
+	return false;
+}
+
+// 主模拟函数， dt是预期每帧时间，按理是固定的
+// 按理说这里会同步数据和处理暂停（希望
 
 void ed_fm_simulate(double dt)
 {
@@ -259,6 +299,7 @@ void ed_fm_simulate(double dt)
 	simulate_fuel_consumption(dt);
 }
 
+// 获取大气数据，这个函数会在simulation前调用
 void ed_fm_set_atmosphere(double h,//altitude above sea level
 							double t,//current atmosphere temperature , Kelwins
 							double a,//speed of sound
@@ -276,10 +317,12 @@ void ed_fm_set_atmosphere(double h,//altitude above sea level
 	atmosphere_density = ro;
 	speed_of_sound     = a;
 }
+
 /*
 called before simulation to set up your environment for the next step
 */
-void ed_fm_set_current_mass_state (double mass,
+// 此处会在模拟开始时调用，提供默认状态
+void ed_fm_set_current_mass_state (double mass, // 不包含油量的干重
 									double center_of_mass_x,
 									double center_of_mass_y,
 									double center_of_mass_z,
@@ -295,6 +338,7 @@ void ed_fm_set_current_mass_state (double mass,
 /*
 called before simulation to set up your environment for the next step
 */
+// 在模拟函数前设置基于世界参考系的状态
 void ed_fm_set_current_state (double ax,//linear acceleration component in world coordinate system
 							double ay,//linear acceleration component in world coordinate system
 							double az,//linear acceleration component in world coordinate system
@@ -321,7 +365,7 @@ void ed_fm_set_current_state (double ax,//linear acceleration component in world
 	velocity_world_cs.z = vz;
 }
 
-
+// 在模拟函数前设置基于飞机坐标系的状态
 void ed_fm_set_current_state_body_axis(double ax,//linear acceleration component in body coordinate system
 	double ay,//linear acceleration component in body coordinate system
 	double az,//linear acceleration component in body coordinate system
@@ -347,8 +391,10 @@ void ed_fm_set_current_state_body_axis(double ax,//linear acceleration component
 {
 	aoa = common_angle_of_attack;
 }
+
 /*
 input handling
+处理传入按键状态，刷新操作面等
 */
 void ed_fm_set_command (int command,
 							float value)
@@ -386,6 +432,7 @@ void ed_fm_set_command (int command,
 	//internal DCS calculations for changing mass, center of gravity,  and moments of inertia
 	}
 */
+// 在simulation函数后调用，需要反馈这次simulation中的燃油消耗
 bool ed_fm_change_mass  (double & delta_mass,
 						double & delta_mass_pos_x,
 						double & delta_mass_pos_y,
@@ -418,6 +465,7 @@ bool ed_fm_change_mass  (double & delta_mass,
 /*
 	set internal fuel volume , init function, called on object creation and for refueling , 
 	you should distribute it inside at different fuel tanks
+	初始化内部燃油数据
 */
 void   ed_fm_set_internal_fuel(double fuel)
 {
@@ -425,6 +473,7 @@ void   ed_fm_set_internal_fuel(double fuel)
 }
 /*
 	get internal fuel volume 
+	ed获取内油情况
 */
 double ed_fm_get_internal_fuel()
 {
@@ -432,6 +481,7 @@ double ed_fm_get_internal_fuel()
 }
 /*
 	set external fuel volume for each payload station , called for weapon init and on reload
+	在初始化和装载时提供此燃油调用设置
 */
 void  ed_fm_set_external_fuel (int	 station,
 								double fuel,
@@ -443,12 +493,21 @@ void  ed_fm_set_external_fuel (int	 station,
 }
 /*
 	get external fuel volume 
+	ed获取外部燃油数据
 */
 double ed_fm_get_external_fuel ()
 {
 	return 0;
 }
 
+// 获取加油量更新
+double ed_fm_refueling_add_fuel(double fuel)
+{
+
+}
+
+// 绘制动画函数
+// drawargs[argnum].f = (float)your transfer data
 void ed_fm_set_draw_args (EdDrawArgument * drawargs,size_t size)
 {
 	drawargs[28].f   = (float)throttle;
@@ -469,6 +528,13 @@ void ed_fm_configure(const char * cfg_path)
 
 }
 
+// 获取头部抖动情况
+double ed_fm_get_shake_amplitude()
+{
+	return 0;
+}
+
+// 基础的一些数据反馈例如引擎状况等
 double test_gear_state = 0;
 double ed_fm_get_param(unsigned index)
 {
@@ -507,7 +573,7 @@ double ed_fm_get_param(unsigned index)
 
 }
 
-
+// 启动数据初始化
 void ed_fm_cold_start()
 {
 
@@ -523,23 +589,50 @@ void ed_fm_hot_start_in_air()
 
 }
 
-bool ed_fm_add_local_force_component( double & x,double &y,double &z,double & pos_x,double & pos_y,double & pos_z )
+bool ed_fm_enable_debug_info()
 {
 	return false;
 }
 
-bool ed_fm_add_global_force_component( double & x,double &y,double &z,double & pos_x,double & pos_y,double & pos_z )
+size_t ed_fm_debug_watch(int level, char *buffer, size_t maxlen)
 {
-	return false;
+	return 0;
 }
 
-bool ed_fm_add_local_moment_component( double & x,double &y,double &z )
+// 维修和损伤
+void ed_fm_on_damage(int Element, double element_integrity_factor)
 {
-	return false;
+
 }
 
-bool ed_fm_add_global_moment_component( double & x,double &y,double &z )
+void ed_fm_repair()
 {
-	return false;
+
 }
 
+bool ed_fm_need_to_be_repair()
+{
+
+}
+
+// 这俩主要暂时给航母起飞用
+bool ed_fm_pop_simulation_event (ed_fm_simulation_event & out)
+{
+
+}
+
+	// bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in) // same as pop . but function direction is reversed -> DCS will call it for your FM when ingame event occurs
+bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in)
+{
+
+}
+
+void ed_fm_set_property_string(const char * property_name,const char * value)
+{
+
+}
+
+void ed_fm_set_property_numeric(const char * property_name,float value)
+{
+
+}
