@@ -6,6 +6,15 @@
 #include <stdio.h>
 #include <string>
 
+// start user define class
+#include "Interface/A6eInterface.h"
+
+namespace A6E
+{
+	// A6eAtmosphere Atmos;
+	A6eInterface Interface;
+}
+
 // template 给的参考算法
 Vec3	common_moment;
 Vec3	common_force;
@@ -243,6 +252,7 @@ bool ed_fm_add_global_moment_component(double & x,double &y,double &z)
 
 void ed_fm_simulate(double dt)
 {
+
 	common_force  = Vec3();
 	common_moment = Vec3();
 
@@ -596,7 +606,7 @@ bool ed_fm_enable_debug_info()
 
 size_t ed_fm_debug_watch(int level, char *buffer, size_t maxlen)
 {
-	return 0;
+	return  sprintf_s(buffer,maxlen,"TempParameter: %s", A6E::Interface.getParamValue("NoseWPOS_IND"));;
 }
 
 // 维修和损伤
