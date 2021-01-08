@@ -626,13 +626,3 @@ bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in)
 {
 
 }
-
-void ed_fm_set_property_string(const char * property_name,const char * value)
-{
-
-}
-
-void ed_fm_set_property_numeric(const char * property_name,float value)
-{
-
-}

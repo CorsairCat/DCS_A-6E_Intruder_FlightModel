@@ -200,7 +200,4 @@ extern "C"
 	// bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in) // same as pop . but function direction is reversed -> DCS will call it for your FM when ingame event occurs
 	A6E_FM_API bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in);
 
-	// 传递params， 似乎， 需要测试
-	A6E_FM_API void ed_fm_set_property_string(const char * property_name,const char * value);
-	A6E_FM_API void ed_fm_set_property_numeric(const char * property_name,float value);
 };
