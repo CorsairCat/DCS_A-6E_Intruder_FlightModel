@@ -8,11 +8,14 @@
 
 // start user define class
 #include "Interface/A6eInterface.h"
+#include "Mechanic/A6eGear.h"
 
 namespace A6E
 {
 	// A6eAtmosphere Atmos;
+	int IS_INIT = 1;
 	A6eInterface Interface;
+	A6eGearSystem Gear;
 }
 
 // template 给的参考算法
@@ -520,16 +523,31 @@ double ed_fm_refueling_add_fuel(double fuel)
 // drawargs[argnum].f = (float)your transfer data
 void ed_fm_set_draw_args (EdDrawArgument * drawargs,size_t size)
 {
-	drawargs[28].f   = (float)throttle;
-	drawargs[29].f   = (float)throttle;
+	//drawargs[28].f   = (float)throttle;
+	//drawargs[29].f   = (float)throttle;
 
-	if (size > 616)
-	{	
-		drawargs[611].f = drawargs[0].f;
-		drawargs[614].f = drawargs[3].f;
-		drawargs[616].f = drawargs[5].f;
+	//if (size > 616)
+	//{	
+	//	drawargs[611].f = drawargs[0].f;
+	//	drawargs[614].f = drawargs[3].f;
+	//	drawargs[616].f = drawargs[5].f;
+	//}
+	if (A6E::IS_INIT == 1)
+	{
+		drawargs[0].f = A6E::Gear.GearNoseStatus;
+		drawargs[3].f = A6E::Gear.GearRightStatus;
+		drawargs[5].f = A6E::Gear.GearLeftStatus;
+
+		A6E::IS_INIT = 0;
 	}
-
+	else
+	{
+		// get gear data
+		A6E::Gear.GearNoseStatus = drawargs[0].f;
+		A6E::Gear.GearRightStatus = drawargs[3].f;
+		A6E::Gear.GearLeftStatus = drawargs[5].f;
+	}
+	
 }
 
 
@@ -567,16 +585,37 @@ double ed_fm_get_param(unsigned index)
 			return throttle;
 		}
 	}
-	else if (index >= ED_FM_SUSPENSION_0_RELATIVE_BRAKE_MOMENT &&
-			 index < ED_FM_OXYGEN_SUPPLY)
+	else
 	{
-		static const int block_size = ED_FM_SUSPENSION_1_RELATIVE_BRAKE_MOMENT - ED_FM_SUSPENSION_0_RELATIVE_BRAKE_MOMENT;
+		//static const int block_size = ED_FM_SUSPENSION_1_RELATIVE_BRAKE_MOMENT - ED_FM_SUSPENSION_0_RELATIVE_BRAKE_MOMENT;
+		//switch (index)
+		//{
+		//case 0 * block_size + ED_FM_SUSPENSION_0_GEAR_POST_STATE:
+		//case 1 * block_size + ED_FM_SUSPENSION_0_GEAR_POST_STATE:
+		//case 2 * block_size + ED_FM_SUSPENSION_0_GEAR_POST_STATE:
+		//	return test_gear_state;
+		//}
 		switch (index)
 		{
-		case 0 * block_size + ED_FM_SUSPENSION_0_GEAR_POST_STATE:
-		case 1 * block_size + ED_FM_SUSPENSION_0_GEAR_POST_STATE:
-		case 2 * block_size + ED_FM_SUSPENSION_0_GEAR_POST_STATE:
-			return test_gear_state;
+		case ED_FM_SUSPENSION_0_GEAR_POST_STATE:
+			return A6E::Gear.GearNoseStatus;
+			//break;
+		case ED_FM_SUSPENSION_1_GEAR_POST_STATE:
+			return A6E::Gear.GearRightStatus;
+			//break;
+		case ED_FM_SUSPENSION_2_GEAR_POST_STATE:
+			return A6E::Gear.GearLeftStatus;
+			//break;
+		case ED_FM_FC3_STICK_PITCH:
+			return stick_pitch;
+		case ED_FM_FC3_STICK_ROLL:
+			return stick_roll;
+		//case ED_FM_FC3_RUDDER_PEDALS:
+
+		//case ED_FM_FC3_THROTTLE_LEFT:
+
+		//case ED_FM_FC3_THROTTLE_RIGHT:
+
 		}
 	}
 	return 0;
@@ -586,17 +625,23 @@ double ed_fm_get_param(unsigned index)
 // 启动数据初始化
 void ed_fm_cold_start()
 {
-
+	A6E::Gear.GearNoseStatus = 1;
+	A6E::Gear.GearRightStatus = 1;
+	A6E::Gear.GearLeftStatus = 1;
 }
 
 void ed_fm_hot_start()
 {
-
+	A6E::Gear.GearNoseStatus = 1;
+	A6E::Gear.GearRightStatus = 1;
+	A6E::Gear.GearLeftStatus = 1;
 }
 
 void ed_fm_hot_start_in_air()
 {
-
+	A6E::Gear.GearNoseStatus = 0;
+	A6E::Gear.GearRightStatus = 0;
+	A6E::Gear.GearLeftStatus = 0;
 }
 
 bool ed_fm_enable_debug_info()
@@ -626,13 +671,14 @@ bool ed_fm_need_to_be_repair()
 }
 
 // 这俩主要暂时给航母起飞用
+// 返回表示是否需要多个event响应
 bool ed_fm_pop_simulation_event (ed_fm_simulation_event & out)
 {
-	return true;
+	return false;
 }
 
 	// bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in) // same as pop . but function direction is reversed -> DCS will call it for your FM when ingame event occurs
 bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in)
 {
-	return true;
+	return false;
 }

@@ -2,5 +2,7 @@
   A6E_FM.cpp
 T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\Interface\A6eInterface.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-    正在创建库 ..\..\bin\x86_64\vc100.debug\A-6E_Intruder_FM.lib 和对象 ..\..\bin\x86_64\vc100.debug\A-6E_Intruder_FM.exp
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(537,28): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(538,28): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(539,28): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
   A-6E_Intruder_FM.vcxproj -> T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\bin\x86_64\vc100.debug\A-6E_Intruder_FM.dll
