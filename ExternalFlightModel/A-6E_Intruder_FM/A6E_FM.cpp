@@ -314,7 +314,8 @@ void ed_fm_simulate(double dt)
 
 	simulate_fuel_consumption(dt);
 
-	// Throttle Control Update
+	// Throttle Control Update starts here
+	// update throttle
 	if (A6E::EngineLeft.updateThrottlePosition())
 	{
 		A6E::Interface.setParamValue("EFM_LEFT_THRUST_A", A6E::EngineLeft.throttlePosition);
@@ -323,7 +324,9 @@ void ed_fm_simulate(double dt)
 	{
 		A6E::Interface.setParamValue("EFM_RIGHT_THRUST_A", A6E::EngineRight.throttlePosition);
 	}
-	
+	// update idle state from throttle animation
+	A6E::EngineLeft.updateIdleState(A6E::Interface.getParamValue("LeftThrottor"));
+	A6E::EngineRight.updateIdleState(A6E::Interface.getParamValue("RightThrottor"));
 }
 
 // 获取大气数据，这个函数会在simulation前调用
@@ -460,6 +463,23 @@ void ed_fm_set_command (int command,
 		A6E::EngineLeft.throttleKeyBoard = 0;
 		A6E::EngineRight.throttleKeyBoard = 0;
 	}
+	else if (command == 311) // icommand left start
+	{
+		A6E::EngineLeft.engineDesiredState = 1;
+	}
+	else if (command == 313) // icommand left stop
+	{
+		A6E::EngineLeft.engineDesiredState = 0;
+	}
+	else if (command == 312) // icommand right start
+	{
+		A6E::EngineRight.engineDesiredState = 1;
+	}
+	else if (command == 314) // icommand right stop
+	{
+		A6E::EngineRight.engineDesiredState = 0;
+	}
+	
 
 	// Control Stick Control
 	else if (command == 2001)//iCommandPlanePitch
