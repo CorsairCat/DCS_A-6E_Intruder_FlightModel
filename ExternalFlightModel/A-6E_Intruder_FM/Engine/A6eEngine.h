@@ -8,7 +8,11 @@ class A6eEngineSystem
 {
 private:
     /* data */
-
+    double RPM;
+    double CoreRPM;
+    double FuelFlow;
+    double CodeTemperature;
+    double ExhaustTemperature;
 public:
     double throttlePosition = 0;
     double throttleKeyBoard = 0;
