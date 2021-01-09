@@ -13,6 +13,7 @@ private:
     double FuelFlow;
     double CodeTemperature;
     double ExhaustTemperature;
+    
 public:
     double throttlePosition = 0;
     double throttleKeyBoard = 0;
