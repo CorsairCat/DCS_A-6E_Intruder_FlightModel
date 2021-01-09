@@ -612,8 +612,6 @@ double ed_fm_get_shake_amplitude()
 double test_gear_state = 0;
 double ed_fm_get_param(unsigned index)
 {
-	if (index <= ED_FM_END_ENGINE_BLOCK)
-	{
 		switch (index)
 		{
 		case ED_FM_ENGINE_0_RPM:			
@@ -623,36 +621,57 @@ double ed_fm_get_param(unsigned index)
 			return 0; // APU
 		// engine left
 		case ED_FM_ENGINE_1_RPM:
-			return 4000; //(55 + A6E::EngineLeft.throttlePosition * 0.6) * 4000;//throttle * 3000;
+			return ((0.55 + A6E::EngineLeft.throttlePosition * 0.6) * 4000);//throttle * 3000;
 		case ED_FM_ENGINE_1_RELATED_RPM:
-			return 55;// + A6E::EngineLeft.throttlePosition * 0.6;//throttle;
+			return (0.55 + A6E::EngineLeft.throttlePosition * 0.6);//throttle;
 		case ED_FM_ENGINE_1_THRUST:
 			return (A6E::EngineLeft.throttlePosition * 7892);//throttle * 5000 * 9.81; in Newton
 		case ED_FM_ENGINE_1_RELATED_THRUST:
 			return (A6E::EngineLeft.throttlePosition);//throttle;
+		case ED_FM_ENGINE_1_CORE_RPM:
+			return ((0.55 + A6E::EngineLeft.throttlePosition * 0.6) * 4000);//throttle * 3000;
+		case ED_FM_ENGINE_1_CORE_RELATED_RPM:
+			return (0.55 + A6E::EngineLeft.throttlePosition * 0.6);//throttle;
+		case ED_FM_ENGINE_1_CORE_THRUST:
+			return (A6E::EngineLeft.throttlePosition * 7892);//throttle * 5000 * 9.81; in Newton
+		case ED_FM_ENGINE_1_CORE_RELATED_THRUST:
+			return (A6E::EngineLeft.throttlePosition);//throttle;
+		case ED_FM_ENGINE_1_TEMPERATURE:
+			return 600;
+		case ED_FM_ENGINE_1_OIL_PRESSURE:
+			return 30;
+		case ED_FM_ENGINE_1_FUEL_FLOW:
+			return 1;
+		case ED_FM_ENGINE_1_COMBUSTION:
+			// not implemented now
+			return 0;
 		// engine right
 		case ED_FM_ENGINE_2_RPM:
-			return ((55 + A6E::EngineRight.throttlePosition * 0.6) * 4000);//throttle * 3000;
+			return ((0.55 + A6E::EngineRight.throttlePosition * 0.6) * 4000);//throttle * 3000;
 		case ED_FM_ENGINE_2_RELATED_RPM:
-			return (55 + A6E::EngineRight.throttlePosition * 0.6);//throttle;
+			return (0.55 + A6E::EngineRight.throttlePosition * 0.6);//throttle;
 		case ED_FM_ENGINE_2_THRUST:
 			return (A6E::EngineRight.throttlePosition * 7892);//throttle * 5000 * 9.81; in Newton
 		case ED_FM_ENGINE_2_RELATED_THRUST:
 			return (A6E::EngineRight.throttlePosition);//throttle;
-		}
-	}
-	else
-	{
-		//static const int block_size = ED_FM_SUSPENSION_1_RELATIVE_BRAKE_MOMENT - ED_FM_SUSPENSION_0_RELATIVE_BRAKE_MOMENT;
-		//switch (index)
-		//{
-		//case 0 * block_size + ED_FM_SUSPENSION_0_GEAR_POST_STATE:
-		//case 1 * block_size + ED_FM_SUSPENSION_0_GEAR_POST_STATE:
-		//case 2 * block_size + ED_FM_SUSPENSION_0_GEAR_POST_STATE:
-		//	return test_gear_state;
-		//}
-		switch (index)
-		{
+		case ED_FM_ENGINE_2_CORE_RPM:
+			return ((0.55 + A6E::EngineRight.throttlePosition * 0.6) * 4000);//throttle * 3000;
+		case ED_FM_ENGINE_2_CORE_RELATED_RPM:
+			return (0.55 + A6E::EngineRight.throttlePosition * 0.6);//throttle;
+		case ED_FM_ENGINE_2_CORE_THRUST:
+			return (A6E::EngineRight.throttlePosition * 7892);//throttle * 5000 * 9.81; in Newton
+		case ED_FM_ENGINE_2_CORE_RELATED_THRUST:
+			return (A6E::EngineRight.throttlePosition);//throttle;
+		case ED_FM_ENGINE_2_TEMPERATURE:
+			return 600;
+		case ED_FM_ENGINE_2_OIL_PRESSURE:
+			return 30;
+		case ED_FM_ENGINE_2_FUEL_FLOW:
+			return 1;
+		case ED_FM_ENGINE_2_COMBUSTION:
+			// not implemented now
+			return 0;
+		// Gear
 		case ED_FM_SUSPENSION_0_GEAR_POST_STATE:
 			return A6E::Gear.GearNoseStatus;
 			//break;
@@ -671,9 +690,7 @@ double ed_fm_get_param(unsigned index)
 		//case ED_FM_FC3_THROTTLE_LEFT:
 
 		//case ED_FM_FC3_THROTTLE_RIGHT:
-
 		}
-	}
 	return 0;
 
 }
