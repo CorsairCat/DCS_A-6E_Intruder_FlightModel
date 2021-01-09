@@ -78,3 +78,6 @@ double lerp(double * x,double * f, unsigned sz, double t)
 	}
 	return f[sz-1];
 }
+
+double LbsToKg = 2.205;
+double FtToMeter = 1/3.281;

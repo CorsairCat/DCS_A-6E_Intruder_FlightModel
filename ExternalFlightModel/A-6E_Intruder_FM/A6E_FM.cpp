@@ -9,6 +9,7 @@
 // start user define class
 #include "Interface/A6eInterface.h"
 #include "Mechanic/A6eGear.h"
+#include "Engine/A6eEngine.h"
 
 namespace A6E
 {
@@ -16,6 +17,8 @@ namespace A6E
 	int IS_INIT = 1;
 	A6eInterface Interface;
 	A6eGearSystem Gear;
+	A6eEngineSystem EngineLeft;
+	A6eEngineSystem EngineRight;
 }
 
 // template 给的参考算法
@@ -310,6 +313,17 @@ void ed_fm_simulate(double dt)
 	add_local_force(aileron_right,aileron_right_pos);
 
 	simulate_fuel_consumption(dt);
+
+	// Throttle Control Update
+	if (A6E::EngineLeft.updateThrottlePosition())
+	{
+		A6E::Interface.setParamValue("EFM_LEFT_THRUST_A", A6E::EngineLeft.throttlePosition);
+	}
+	if (A6E::EngineRight.updateThrottlePosition())
+	{
+		A6E::Interface.setParamValue("EFM_RIGHT_THRUST_A", A6E::EngineRight.throttlePosition);
+	}
+	
 }
 
 // 获取大气数据，这个函数会在simulation前调用
@@ -335,7 +349,7 @@ void ed_fm_set_atmosphere(double h,//altitude above sea level
 called before simulation to set up your environment for the next step
 */
 // 此处会在模拟开始时调用，提供默认状态
-void ed_fm_set_current_mass_state (double mass, // 不包含油量的干重
+void ed_fm_set_current_mass_state ( double mass, // 不包含油量的干重
 									double center_of_mass_x,
 									double center_of_mass_y,
 									double center_of_mass_z,
@@ -412,10 +426,42 @@ input handling
 void ed_fm_set_command (int command,
 							float value)
 {
+	// Throttle Control
 	if (command == 2004)//iCommandPlaneThrustCommon
 	{
-		throttle = 0.5 * (-value + 1.0);
+		// throttle = 0.5 * (-value + 1.0);
+		A6E::EngineLeft.throttlePosition = value; // left_throttle_efm
+		A6E::EngineRight.throttlePosition = value;
+		A6E::Interface.setParamValue("EFM_LEFT_THRUST_A", A6E::EngineLeft.throttlePosition);
+		A6E::Interface.setParamValue("EFM_RIGHT_THRUST_A", A6E::EngineRight.throttlePosition);
 	}
+	else if (command == 2005)//left throttle axis
+	{
+		A6E::EngineLeft.throttlePosition = value; // left_throttle_efm
+		A6E::Interface.setParamValue("EFM_LEFT_THRUST_A", A6E::EngineLeft.throttlePosition);
+	}
+	else if (command == 2006)//right throttle axis
+	{
+		A6E::EngineRight.throttlePosition = value;
+		A6E::Interface.setParamValue("EFM_RIGHT_THRUST_A", A6E::EngineRight.throttlePosition);
+	}
+	else if (command == 1032)//iCommand Throttle Increase
+	{
+		A6E::EngineLeft.throttleKeyBoard = 1;
+		A6E::EngineRight.throttleKeyBoard = 1;
+	}
+	else if (command == 1033)// iCommand Throttle Decrease
+	{
+		A6E::EngineLeft.throttleKeyBoard = -1;
+		A6E::EngineRight.throttleKeyBoard = -1;
+	}
+	else if (command == 1034) // iCommand Throttle Stop
+	{
+		A6E::EngineLeft.throttleKeyBoard = 0;
+		A6E::EngineRight.throttleKeyBoard = 0;
+	}
+
+	// Control Stick Control
 	else if (command == 2001)//iCommandPlanePitch
 	{
 		stick_pitch		  = value;
@@ -575,14 +621,24 @@ double ed_fm_get_param(unsigned index)
 		case ED_FM_ENGINE_0_THRUST:			
 		case ED_FM_ENGINE_0_RELATED_THRUST:	
 			return 0; // APU
+		// engine left
 		case ED_FM_ENGINE_1_RPM:
-			return throttle * 3000;
+			return 4000; //(55 + A6E::EngineLeft.throttlePosition * 0.6) * 4000;//throttle * 3000;
 		case ED_FM_ENGINE_1_RELATED_RPM:
-			return throttle;
+			return 55;// + A6E::EngineLeft.throttlePosition * 0.6;//throttle;
 		case ED_FM_ENGINE_1_THRUST:
-			return throttle * 5000 * 9.81;
+			return (A6E::EngineLeft.throttlePosition * 7892);//throttle * 5000 * 9.81; in Newton
 		case ED_FM_ENGINE_1_RELATED_THRUST:
-			return throttle;
+			return (A6E::EngineLeft.throttlePosition);//throttle;
+		// engine right
+		case ED_FM_ENGINE_2_RPM:
+			return ((55 + A6E::EngineRight.throttlePosition * 0.6) * 4000);//throttle * 3000;
+		case ED_FM_ENGINE_2_RELATED_RPM:
+			return (55 + A6E::EngineRight.throttlePosition * 0.6);//throttle;
+		case ED_FM_ENGINE_2_THRUST:
+			return (A6E::EngineRight.throttlePosition * 7892);//throttle * 5000 * 9.81; in Newton
+		case ED_FM_ENGINE_2_RELATED_THRUST:
+			return (A6E::EngineRight.throttlePosition);//throttle;
 		}
 	}
 	else
@@ -651,7 +707,7 @@ bool ed_fm_enable_debug_info()
 
 size_t ed_fm_debug_watch(int level, char *buffer, size_t maxlen)
 {
-	return  sprintf_s(buffer,maxlen,"TempParameter: %.2f", A6E::Interface.getParamValue("NoseWPOS_IND"));;
+	return sprintf_s(buffer,maxlen,"TempParameter: %f,", A6E::EngineLeft.throttlePosition);;
 }
 
 // 维修和损伤
