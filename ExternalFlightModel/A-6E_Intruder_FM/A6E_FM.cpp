@@ -295,7 +295,8 @@ void ed_fm_simulate(double dt)
 	// End of Throttle Control
 	
 	Vec3 thrust_pos(A6E::emptyCG.x,A6E::emptyCG.y,A6E::emptyCG.z);
-	Vec3 thrust(A6E::EngineLeft.netThrust + A6E::EngineRight.netThrust, 0 , 0);
+	Vec3 thrust(0 , 0 , 0);
+	//A6E::EngineLeft.netThrust + A6E::EngineRight.netThrust
 
 	double CyAlpha_ = lerp(mach_table,Cya  ,sizeof(mach_table)/sizeof(double),Mach);
 	double Cx0_     = lerp(mach_table,cx0  ,sizeof(mach_table)/sizeof(double),Mach);

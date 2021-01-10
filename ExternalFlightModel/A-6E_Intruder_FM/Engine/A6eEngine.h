@@ -17,9 +17,9 @@ private:
     int throttleIdleState = 0;
     int isPreStartCrank = 0;
     double rpmIncreaseStep = 0;
-    double kp = 0.6;
-    double ki = 0.6;
-    double kd = 0.6;
+    double kp = 12;
+    double ki = 6;
+    double kd = 6;
     double I_counter = 0;
     double FuelFlowStep = 0.1; // 变化率为 0.1 kg/sec
     double getAirFlowMassRate()
