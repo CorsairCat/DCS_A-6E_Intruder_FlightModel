@@ -728,6 +728,8 @@ void ed_fm_cold_start()
 	A6E::Gear.GearNoseStatus = 1;
 	A6E::Gear.GearRightStatus = 1;
 	A6E::Gear.GearLeftStatus = 1;
+	A6E::EngineLeft.initialEngineState(0);
+	A6E::EngineRight.initialEngineState(0);
 }
 
 void ed_fm_hot_start()
@@ -735,6 +737,8 @@ void ed_fm_hot_start()
 	A6E::Gear.GearNoseStatus = 1;
 	A6E::Gear.GearRightStatus = 1;
 	A6E::Gear.GearLeftStatus = 1;
+	A6E::EngineLeft.initialEngineState(1);
+	A6E::EngineRight.initialEngineState(1);
 }
 
 void ed_fm_hot_start_in_air()
@@ -742,6 +746,8 @@ void ed_fm_hot_start_in_air()
 	A6E::Gear.GearNoseStatus = 0;
 	A6E::Gear.GearRightStatus = 0;
 	A6E::Gear.GearLeftStatus = 0;
+	A6E::EngineLeft.initialEngineState(1);
+	A6E::EngineRight.initialEngineState(1);
 }
 
 bool ed_fm_enable_debug_info()

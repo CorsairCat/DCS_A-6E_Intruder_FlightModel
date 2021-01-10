@@ -9,10 +9,10 @@ class A6eEngineSystem
 {
 private:
     /* data */
-    double DesiredFuelFlow;
-    double targetFuelFlow;
-    double staticThrust;
-    double targetThrust;
+    double DesiredFuelFlow = 0;
+    double targetFuelFlow = 0;
+    double staticThrust = 0;
+    double targetThrust = 0;
     double ErrorLastTime = 0;
     int throttleIdleState = 0;
     int isPreStartCrank = 0;
@@ -292,12 +292,21 @@ public:
         if (BirthState == 1)
         {
             throttleIdleState = 1;
+            engineDesiredState = 1;
+            staticThrust = 2000;
+            targetThrust = 0;
             FuelFlow = 0.1;
+            CoreRPM = 6600;
+            //netThrust = 2000;
+            DesiredFuelFlow = 0.1;
         }
         else if (BirthState == 0)
         {
             throttleIdleState = 0;
+            engineDesiredState = 0;
             FuelFlow = 0;
+            CoreRPM = 0;
+            netThrust = 0;
         }
     }
 };
