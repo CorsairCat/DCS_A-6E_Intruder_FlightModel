@@ -15,6 +15,7 @@ namespace A6E
 {
 	// A6eAtmosphere Atmos;
 	int IS_INIT = 1;
+	Vec3 emptyCG = {5.8784 - 4.572, -0.7883, 0};
 	A6eInterface Interface;
 	A6eGearSystem Gear;
 	A6eEngineSystem EngineLeft;
@@ -268,13 +269,33 @@ void ed_fm_simulate(double dt)
 	airspeed.y = velocity_world_cs.y - wind.y;
 	airspeed.z = velocity_world_cs.z - wind.z;
 
-	
-	Vec3 thrust_pos(-5.0,0,0);
-	Vec3 thrust(throttle * 5000, 0 , 0);
-
 	double V_scalar =  sqrt(airspeed.x * airspeed.x + airspeed.y * airspeed.y + airspeed.z * airspeed.z);
-
 	double Mach		= V_scalar/ speed_of_sound;
+
+	// Throttle Control Update starts here
+	// update throttle
+	if (A6E::EngineLeft.updateThrottlePosition())
+	{
+		A6E::Interface.setParamValue("EFM_LEFT_THRUST_A", A6E::EngineLeft.throttlePosition);
+	}
+	if (A6E::EngineRight.updateThrottlePosition())
+	{
+		A6E::Interface.setParamValue("EFM_RIGHT_THRUST_A", A6E::EngineRight.throttlePosition);
+	}
+	// update frametime
+	A6E::EngineLeft.dt = dt;
+	A6E::EngineRight.dt = dt;
+	// update idle state from throttle animation
+	A6E::EngineLeft.updateIdleState(A6E::Interface.getParamValue("LeftThrottor"));
+	A6E::EngineRight.updateIdleState(A6E::Interface.getParamValue("RightThrottor"));
+	// update thrust
+	A6E::EngineLeft.getEngineNetThrust(V_scalar);
+	A6E::EngineRight.getEngineNetThrust(V_scalar);
+
+	// End of Throttle Control
+	
+	Vec3 thrust_pos(A6E::emptyCG.x,A6E::emptyCG.y,A6E::emptyCG.z);
+	Vec3 thrust(A6E::EngineLeft.netThrust + A6E::EngineRight.netThrust, 0 , 0);
 
 	double CyAlpha_ = lerp(mach_table,Cya  ,sizeof(mach_table)/sizeof(double),Mach);
 	double Cx0_     = lerp(mach_table,cx0  ,sizeof(mach_table)/sizeof(double),Mach);
@@ -313,20 +334,6 @@ void ed_fm_simulate(double dt)
 	add_local_force(aileron_right,aileron_right_pos);
 
 	simulate_fuel_consumption(dt);
-
-	// Throttle Control Update starts here
-	// update throttle
-	if (A6E::EngineLeft.updateThrottlePosition())
-	{
-		A6E::Interface.setParamValue("EFM_LEFT_THRUST_A", A6E::EngineLeft.throttlePosition);
-	}
-	if (A6E::EngineRight.updateThrottlePosition())
-	{
-		A6E::Interface.setParamValue("EFM_RIGHT_THRUST_A", A6E::EngineRight.throttlePosition);
-	}
-	// update idle state from throttle animation
-	A6E::EngineLeft.updateIdleState(A6E::Interface.getParamValue("LeftThrottor"));
-	A6E::EngineRight.updateIdleState(A6E::Interface.getParamValue("RightThrottor"));
 }
 
 // 获取大气数据，这个函数会在simulation前调用
@@ -641,53 +648,53 @@ double ed_fm_get_param(unsigned index)
 			return 0; // APU
 		// engine left
 		case ED_FM_ENGINE_1_RPM:
-			return ((0.55 + A6E::EngineLeft.throttlePosition * 0.6) * 4000);//throttle * 3000;
+			return A6E::EngineLeft.CoreRPM;
 		case ED_FM_ENGINE_1_RELATED_RPM:
-			return (0.55 + A6E::EngineLeft.throttlePosition * 0.6);//throttle;
+			return (A6E::EngineLeft.CoreRPM / J52Engine::N2InHundred);
 		case ED_FM_ENGINE_1_THRUST:
-			return (A6E::EngineLeft.throttlePosition * 7892);//throttle * 5000 * 9.81; in Newton
+			return (A6E::EngineLeft.netThrust);
 		case ED_FM_ENGINE_1_RELATED_THRUST:
-			return (A6E::EngineLeft.throttlePosition);//throttle;
+			return (A6E::EngineLeft.netThrust / J52Engine::maxStaticThrustNRT);
 		case ED_FM_ENGINE_1_CORE_RPM:
-			return ((0.55 + A6E::EngineLeft.throttlePosition * 0.6) * 4000);//throttle * 3000;
+			return A6E::EngineLeft.CoreRPM;
 		case ED_FM_ENGINE_1_CORE_RELATED_RPM:
-			return (0.55 + A6E::EngineLeft.throttlePosition * 0.6);//throttle;
+			return (A6E::EngineLeft.CoreRPM / J52Engine::N2InHundred);
 		case ED_FM_ENGINE_1_CORE_THRUST:
-			return (A6E::EngineLeft.throttlePosition * 7892);//throttle * 5000 * 9.81; in Newton
+			return (A6E::EngineLeft.netThrust);
 		case ED_FM_ENGINE_1_CORE_RELATED_THRUST:
-			return (A6E::EngineLeft.throttlePosition);//throttle;
+			return (A6E::EngineLeft.netThrust / J52Engine::maxStaticThrustNRT);
 		case ED_FM_ENGINE_1_TEMPERATURE:
 			return 600;
 		case ED_FM_ENGINE_1_OIL_PRESSURE:
 			return 30;
 		case ED_FM_ENGINE_1_FUEL_FLOW:
-			return 1;
+			return A6E::EngineLeft.FuelFlow;
 		case ED_FM_ENGINE_1_COMBUSTION:
 			// not implemented now
 			return 0;
 		// engine right
 		case ED_FM_ENGINE_2_RPM:
-			return ((0.55 + A6E::EngineRight.throttlePosition * 0.6) * 4000);//throttle * 3000;
+			return A6E::EngineRight.CoreRPM;
 		case ED_FM_ENGINE_2_RELATED_RPM:
-			return (0.55 + A6E::EngineRight.throttlePosition * 0.6);//throttle;
+			return (A6E::EngineRight.CoreRPM / J52Engine::N2InHundred);
 		case ED_FM_ENGINE_2_THRUST:
-			return (A6E::EngineRight.throttlePosition * 7892);//throttle * 5000 * 9.81; in Newton
+			return A6E::EngineRight.netThrust;//throttle * 5000 * 9.81; in Newton
 		case ED_FM_ENGINE_2_RELATED_THRUST:
-			return (A6E::EngineRight.throttlePosition);//throttle;
+			return (A6E::EngineRight.netThrust / J52Engine::maxStaticThrustNRT);
 		case ED_FM_ENGINE_2_CORE_RPM:
-			return ((0.55 + A6E::EngineRight.throttlePosition * 0.6) * 4000);//throttle * 3000;
+			return A6E::EngineRight.CoreRPM;
 		case ED_FM_ENGINE_2_CORE_RELATED_RPM:
-			return (0.55 + A6E::EngineRight.throttlePosition * 0.6);//throttle;
+			return (A6E::EngineRight.CoreRPM / J52Engine::N2InHundred);
 		case ED_FM_ENGINE_2_CORE_THRUST:
-			return (A6E::EngineRight.throttlePosition * 7892);//throttle * 5000 * 9.81; in Newton
+			return A6E::EngineRight.netThrust;//throttle * 5000 * 9.81; in Newton
 		case ED_FM_ENGINE_2_CORE_RELATED_THRUST:
-			return (A6E::EngineRight.throttlePosition);//throttle;
+			return (A6E::EngineRight.netThrust / J52Engine::maxStaticThrustNRT);
 		case ED_FM_ENGINE_2_TEMPERATURE:
 			return 600;
 		case ED_FM_ENGINE_2_OIL_PRESSURE:
 			return 30;
 		case ED_FM_ENGINE_2_FUEL_FLOW:
-			return 1;
+			return A6E::EngineRight.FuelFlow;
 		case ED_FM_ENGINE_2_COMBUSTION:
 			// not implemented now
 			return 0;

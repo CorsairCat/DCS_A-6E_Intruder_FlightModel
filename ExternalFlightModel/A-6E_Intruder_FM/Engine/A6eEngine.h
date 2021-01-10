@@ -9,17 +9,35 @@ class A6eEngineSystem
 {
 private:
     /* data */
+    double DesiredFuelFlow;
+    double targetFuelFlow;
+    double staticThrust;
+    double targetThrust;
+    double ErrorLastTime = 0;
+    int throttleIdleState = 0;
+    int isPreStartCrank = 0;
+    double rpmIncreaseStep = 0;
+    double kp = 0.6;
+    double ki = 0.6;
+    double kd = 0.6;
+    double I_counter = 0;
+    double FuelFlowStep = 0.1; // 变化率为 0.1 kg/sec
+    double getAirFlowMassRate()
+    // in kg/sec
+    {
+        double massFlow = (CoreRPM - 6600) / 2 / 56 + 14;
+        return massFlow;
+    }
+public:
     double LowComprossorRPM;
     double CoreRPM;
     double FuelFlow;
     double CoreTemperature;
     double ExhaustTemperature;
-    double targetFuelFlow;
-    int throttleIdleState = 0;
-    int isPreStartCrank = 0;
-    double rpmIncreaseStep = 0;
-public:
+    double netThrust;// in Newton Unit
+    double dt;
     double throttlePosition = 0;
+    double throttlePositionLastTime = 0;
     double throttleKeyBoard = 0;
     int engineDesiredState = 0; // 0 = stop; 1 = start; 用于lua兼容性; 后期会移除
     bool updateThrottlePosition()
@@ -77,14 +95,14 @@ public:
         
     }
 
-    void updateFuelFlow()
+    void fuelFlowController()
     // call in every simulation
     {
         // if starting/ running/
         // idle state
         if (throttleIdleState == 0)
         {
-            targetFuelFlow = 0;
+            DesiredFuelFlow = 0;
             // when not idle and target is engine start
             if (engineDesiredState == 1)
             {
@@ -100,16 +118,64 @@ public:
             if (engineDesiredState == 0) //if fuel master is off at this time state should be 0:stop
             // means fuel has been cut off
             {
-                targetFuelFlow = 0;
+                DesiredFuelFlow = 0;
             }
             else
             {
                 /* code */
-                targetFuelFlow = throttlePosition + 0.1;
+                // for throttle is direct link to thrust, temply dont want to use rpm as input, just use the static thrust;
+                //targetFuelFlow = throttlePosition + 0.1;
+                // PID for changing data
+                if (throttlePositionLastTime != throttlePosition)
+                {
+                    I_counter = 0;
+                    ErrorLastTime = 0;
+                    throttlePositionLastTime = throttlePosition;
+                }
+                targetThrust = (J52Engine::maxStaticThrustMIL - 2000) * throttlePosition + 2000;
+                double tempdeltaT = targetThrust - staticThrust;
+                I_counter += tempdeltaT;
+                double d_temp = (tempdeltaT - ErrorLastTime) / dt;
+                ErrorLastTime = tempdeltaT;
+                DesiredFuelFlow = ki * I_counter + kp * tempdeltaT + kd * d_temp;
             } 
             isPreStartCrank = 0;
         }
         //
+    }
+
+    void updateFuelFlow()
+    {
+        if (DesiredFuelFlow <= 0.1 && CoreRPM > 6500 && throttleIdleState == 1) 
+        {
+            DesiredFuelFlow = 0.1;
+        }
+        else if (DesiredFuelFlow > 1.04)
+        {
+            DesiredFuelFlow = 1.04;
+        }
+        else if (DesiredFuelFlow < 0)
+        {
+            DesiredFuelFlow = 0;
+        }
+        
+        
+        if (fabs(DesiredFuelFlow - FuelFlow) < (FuelFlowStep * dt))
+        {
+            // do nothing
+            FuelFlow = DesiredFuelFlow;
+        }
+        else
+        {
+            if (DesiredFuelFlow > FuelFlow)
+            {
+                FuelFlow += FuelFlowStep * dt;
+            }
+            else
+            {
+                FuelFlow -= FuelFlowStep * dt;
+            }  
+        }
     }
 
     double getCurrentCoreRPM()
@@ -119,7 +185,7 @@ public:
         {
             int temp = (int)((FuelFlow - 0.1) * 50);
             double temp_remainder = (FuelFlow - 0.1) * 50 - temp;
-            CoreRPM = (J52Engine::ConvertFuelFlowToN2[temp + 1] - J52Engine::ConvertFuelFlowToN2[temp]) * temp_remainder + J52Engine::ConvertFuelFlowToN2[temp + 1];
+            CoreRPM = (J52Engine::ConvertFuelFlowToN2[temp + 1] - J52Engine::ConvertFuelFlowToN2[temp]) * temp_remainder + J52Engine::ConvertFuelFlowToN2[temp];
             // engine is  started successfully, reset signal
             rpmIncreaseStep = 0;
         }
@@ -174,8 +240,7 @@ public:
             else
             {
                 isPreStartCrank = 0; //more than 60s not started, stop crank
-            }
-            
+            }  
         }
         else
         {
@@ -196,15 +261,43 @@ public:
         return CoreRPM;
     }
 
+    double getEngineNetThrust(double airspeed)
+    {
+        fuelFlowController();
+        updateFuelFlow();
+        getCurrentCoreRPM();
+        if (CoreRPM <= 6500)
+        {
+            // in Starting Condition
+             staticThrust = (CoreRPM / 6500 * 2000);
+            netThrust = - getAirFlowMassRate() * airspeed + staticThrust;
+        }
+        else if (CoreRPM <= 12500)
+        {
+            int temp = (int)((CoreRPM - 6500) / 500);
+            double temp_remainder = ((CoreRPM - 6500) / 500) - temp;
+            staticThrust = (J52Engine::ConvertN2ToStaticThrust[temp] + (J52Engine::ConvertN2ToStaticThrust[temp + 1] - J52Engine::ConvertN2ToStaticThrust[temp]) * temp_remainder);
+            netThrust = - getAirFlowMassRate() * airspeed + staticThrust;
+        }
+        else
+        {
+            //more than 12500 RPM, something went wrong, set broken
+            // should never reach this block
+        }
+        return netThrust;
+    }
+
     void initialEngineState(int BirthState) //0: cold; 1: hot
     {
         if (BirthState == 1)
         {
             throttleIdleState = 1;
+            FuelFlow = 0.1;
         }
         else if (BirthState == 0)
         {
             throttleIdleState = 0;
+            FuelFlow = 0;
         }
     }
 };
