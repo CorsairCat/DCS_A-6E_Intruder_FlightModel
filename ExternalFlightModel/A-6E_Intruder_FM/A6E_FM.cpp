@@ -31,6 +31,7 @@ Vec3	velocity_world_cs;
 double  throttle		  = 0;
 double  stick_roll		  = 0;
 double  stick_pitch		  = 0;
+double 	paddel_yaw		  = 0;
 
 double  internal_fuel     = 0;
 double  fuel_consumption_since_last_time  = 0;
@@ -295,7 +296,7 @@ void ed_fm_simulate(double dt)
 	// End of Throttle Control
 	
 	Vec3 thrust_pos(A6E::emptyCG.x,A6E::emptyCG.y,A6E::emptyCG.z);
-	Vec3 thrust(0 , 0 , 0);
+	Vec3 thrust(A6E::EngineLeft.netThrust + A6E::EngineRight.netThrust , 0 , 0);
 	//A6E::EngineLeft.netThrust + A6E::EngineRight.netThrust
 
 	double CyAlpha_ = lerp(mach_table,Cya  ,sizeof(mach_table)/sizeof(double),Mach);
@@ -700,12 +701,18 @@ double ed_fm_get_param(unsigned index)
 			// not implemented now
 			return 0;
 		// Gear
+		case ED_FM_SUSPENSION_0_RELATIVE_BRAKE_MOMENT:
+			return 30000;
 		case ED_FM_SUSPENSION_0_GEAR_POST_STATE:
 			return A6E::Gear.GearNoseStatus;
 			//break;
+		case ED_FM_SUSPENSION_1_RELATIVE_BRAKE_MOMENT:
+			return 30000;
 		case ED_FM_SUSPENSION_1_GEAR_POST_STATE:
 			return A6E::Gear.GearRightStatus;
 			//break;
+		case ED_FM_SUSPENSION_2_RELATIVE_BRAKE_MOMENT:
+			return 30000;
 		case ED_FM_SUSPENSION_2_GEAR_POST_STATE:
 			return A6E::Gear.GearLeftStatus;
 			//break;

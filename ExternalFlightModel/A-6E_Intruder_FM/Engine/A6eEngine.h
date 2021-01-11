@@ -20,7 +20,10 @@ private:
     double kp = 0.014/44000;
     double ki = 0.003/44000;
     double kd = 0.006/44000;
+    double kc = 80000;
+    double antiI = 0;
     double I_counter = 0;
+    double I_counter_lasttime = 0; // 防止积分饱和的记录上一次积分值
     double FuelFlowStep = 0.1; // 变化率为 0.1 kg/sec
     double getAirFlowMassRate()
     // in kg/sec
@@ -127,6 +130,7 @@ public:
                 //targetFuelFlow = throttlePosition + 0.1;
                 // PID for changing data
                 // this part needs a change to control engine fuel decrease
+                // 防止积分饱和
                 targetThrust = (J52Engine::maxStaticThrustMIL - 2000) * throttlePosition + 2000;
                 double tempdeltaT = targetThrust - staticThrust;
                 if (throttlePositionLastTime != throttlePosition)
@@ -134,8 +138,10 @@ public:
                     //I_counter = 0;
                     ErrorLastTime = tempdeltaT;
                     throttlePositionLastTime = throttlePosition;
+                    //antiI = 0;
                 }
-                I_counter += tempdeltaT;
+                I_counter_lasttime = I_counter;
+                I_counter += tempdeltaT - antiI;
                 double d_temp = (tempdeltaT - ErrorLastTime) / dt;
                 ErrorLastTime = tempdeltaT;
                 DesiredFuelFlow = ki * I_counter + kp * tempdeltaT + kd * d_temp;
@@ -147,6 +153,8 @@ public:
 
     void updateFuelFlow()
     {
+        // 输出限幅部分
+        double temp_output = DesiredFuelFlow; 
         if (DesiredFuelFlow <= 0.1 && CoreRPM > 6500 && throttleIdleState == 1) 
         {
             DesiredFuelFlow = 0.1;
@@ -159,6 +167,11 @@ public:
         {
             DesiredFuelFlow = 0;
         }
+
+        // 加一个积分饱和的处理器
+        // use anti AW
+        // double temp_Ti_output = ;
+        antiI = (temp_output - DesiredFuelFlow) * kc;
         
         
         if (fabs(DesiredFuelFlow - FuelFlow) < (FuelFlowStep * dt))
