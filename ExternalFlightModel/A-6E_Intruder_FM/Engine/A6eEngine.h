@@ -17,9 +17,9 @@ private:
     int throttleIdleState = 0;
     int isPreStartCrank = 0;
     double rpmIncreaseStep = 0;
-    double kp = 12;
-    double ki = 6;
-    double kd = 6;
+    double kp = 0.014/44000;
+    double ki = 0.003/44000;
+    double kd = 0.006/44000;
     double I_counter = 0;
     double FuelFlowStep = 0.1; // 变化率为 0.1 kg/sec
     double getAirFlowMassRate()
@@ -126,14 +126,14 @@ public:
                 // for throttle is direct link to thrust, temply dont want to use rpm as input, just use the static thrust;
                 //targetFuelFlow = throttlePosition + 0.1;
                 // PID for changing data
-                if (throttlePositionLastTime != throttlePosition)
-                {
-                    I_counter = 0;
-                    ErrorLastTime = 0;
-                    throttlePositionLastTime = throttlePosition;
-                }
                 targetThrust = (J52Engine::maxStaticThrustMIL - 2000) * throttlePosition + 2000;
                 double tempdeltaT = targetThrust - staticThrust;
+                if (throttlePositionLastTime != throttlePosition)
+                {
+                    //I_counter = 0;
+                    ErrorLastTime = tempdeltaT;
+                    throttlePositionLastTime = throttlePosition;
+                }
                 I_counter += tempdeltaT;
                 double d_temp = (tempdeltaT - ErrorLastTime) / dt;
                 ErrorLastTime = tempdeltaT;
