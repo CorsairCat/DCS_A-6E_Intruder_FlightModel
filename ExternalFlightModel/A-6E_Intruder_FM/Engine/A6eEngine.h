@@ -126,6 +126,7 @@ public:
                 // for throttle is direct link to thrust, temply dont want to use rpm as input, just use the static thrust;
                 //targetFuelFlow = throttlePosition + 0.1;
                 // PID for changing data
+                // this part needs a change to control engine fuel decrease
                 targetThrust = (J52Engine::maxStaticThrustMIL - 2000) * throttlePosition + 2000;
                 double tempdeltaT = targetThrust - staticThrust;
                 if (throttlePositionLastTime != throttlePosition)
@@ -178,6 +179,8 @@ public:
         }
     }
 
+    // set a rpm function to control the rpm decrease/increase step here
+    // mainly for decrease
     double getCurrentCoreRPM()
     {
         //J52Engine::ConvertFuelFlowToN2[0];
