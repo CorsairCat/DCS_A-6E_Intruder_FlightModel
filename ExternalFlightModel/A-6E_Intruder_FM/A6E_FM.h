@@ -200,4 +200,6 @@ extern "C"
 	// bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in) // same as pop . but function direction is reversed -> DCS will call it for your FM when ingame event occurs
 	A6E_FM_API bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in);
 
+	// suspension feed back from main
+	A6E_FM_API void ed_fm_suspension_feedback(int index, const ed_fm_suspension_info * info);
 };

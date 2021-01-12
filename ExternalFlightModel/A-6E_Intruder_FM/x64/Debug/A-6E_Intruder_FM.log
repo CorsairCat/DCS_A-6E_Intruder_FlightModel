@@ -5,7 +5,7 @@ T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_F
 T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\Engine\A6eEngine.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\Engine\J52Constant.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\Motion\A6eFlightControl.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(683,28): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(684,28): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(685,28): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(718,33): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(719,34): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(720,33): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
   A-6E_Intruder_FM.vcxproj -> T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\bin\x86_64\vc100.debug\A-6E_Intruder_FM.dll

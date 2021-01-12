@@ -303,6 +303,11 @@ void ed_fm_simulate(double dt)
 	A6E::FlightControl.updateDuringSimulation();
 	// End of Flight Control
 
+	// Engage for Gear Yaw update;
+	A6E::Gear.nose.updateYawPosition(A6E::FlightControl.exportYaw());
+	A6E::Gear.nose.updateCurrentYaw();
+	// End of gear update
+
 
 	stick_roll = A6E::FlightControl.exportRoll();
 	stick_pitch = A6E::FlightControl.exportPitch();
@@ -570,6 +575,36 @@ void ed_fm_set_command (int command,
 	{
 		A6E::FlightControl.inputPitchKeyboard = 0;
 	}
+	else if (command == 74) // wheel brakes on
+	{
+		A6E::Gear.setWheelBrakes(1);
+	}
+	else if (command == 75) // wheel brakes off
+	{
+		A6E::Gear.setWheelBrakes(0);
+	}
+	else if (command == 2112) // wheel brake axis left
+	{
+		/* code */
+		A6E::Gear.left.BrakeStatusMultiPlier = value;
+	}
+	else if (command == 2113) // wheel brake axis right
+	{
+		/* code */
+		A6E::Gear.right.BrakeStatusMultiPlier = value;
+	}
+	else if (command == 5050) // nose wheel steering on
+	{
+		/* code */
+		A6E::Gear.nose.Steering = 1;
+	}
+	else if (command == 5051) // nose wheel steering off
+	{
+		/* code */
+		A6E::Gear.nose.Steering = 0;
+	}
+	
+	
 }
 /*
 	Mass handling 
@@ -680,21 +715,19 @@ void ed_fm_set_draw_args (EdDrawArgument * drawargs,size_t size)
 	//}
 	if (A6E::IS_INIT == 1)
 	{
-		drawargs[0].f = A6E::Gear.GearNoseStatus;
-		drawargs[3].f = A6E::Gear.GearRightStatus;
-		drawargs[5].f = A6E::Gear.GearLeftStatus;
+		drawargs[0].f = A6E::Gear.nose.GearStatus;
+		drawargs[3].f = A6E::Gear.right.GearStatus;
+		drawargs[5].f = A6E::Gear.left.GearStatus;
 
 		A6E::IS_INIT = 0;
 	}
 	else
 	{
 		// get gear data
-		A6E::Gear.GearNoseStatus = drawargs[0].f;
-		A6E::Gear.GearRightStatus = drawargs[3].f;
-		A6E::Gear.GearLeftStatus = drawargs[5].f;
+		A6E::Gear.nose.GearStatus = drawargs[0].f;
+		A6E::Gear.right.GearStatus = drawargs[3].f;
+		A6E::Gear.left.GearStatus = drawargs[5].f;
 	}
-	test_nosewheel = drawargs[2].f;
-	
 }
 
 
@@ -776,19 +809,19 @@ double ed_fm_get_param(unsigned index)
 		case ED_FM_SUSPENSION_0_RELATIVE_BRAKE_MOMENT:
 			return 0;
 		case ED_FM_SUSPENSION_0_GEAR_POST_STATE:
-			return A6E::Gear.GearNoseStatus;
+			return A6E::Gear.nose.GearStatus;
 			//break;test_nosewheel
 		case ED_FM_SUSPENSION_0_WHEEL_YAW:
-			return A6E::FlightControl.exportYaw();
+			return A6E::Gear.nose.currentYaw;
 		case ED_FM_SUSPENSION_1_RELATIVE_BRAKE_MOMENT:
-			return 0;
+			return A6E::Gear.right.BrakeStatusMultiPlier * 25000;
 		case ED_FM_SUSPENSION_1_GEAR_POST_STATE:
-			return A6E::Gear.GearRightStatus;
+			return A6E::Gear.right.GearStatus;
 			//break;
 		case ED_FM_SUSPENSION_2_RELATIVE_BRAKE_MOMENT:
-			return 0;
+			return A6E::Gear.left.BrakeStatusMultiPlier * 25000;
 		case ED_FM_SUSPENSION_2_GEAR_POST_STATE:
-			return A6E::Gear.GearLeftStatus;
+			return A6E::Gear.left.GearStatus;
 			//break;
 		case ED_FM_FC3_STICK_PITCH:
 			return A6E::FlightControl.exportRoll() * 100;
@@ -807,27 +840,21 @@ double ed_fm_get_param(unsigned index)
 // 启动数据初始化
 void ed_fm_cold_start()
 {
-	A6E::Gear.GearNoseStatus = 1;
-	A6E::Gear.GearRightStatus = 1;
-	A6E::Gear.GearLeftStatus = 1;
+	A6E::Gear.initial(0);
 	A6E::EngineLeft.initialEngineState(0);
 	A6E::EngineRight.initialEngineState(0);
 }
 
 void ed_fm_hot_start()
 {
-	A6E::Gear.GearNoseStatus = 1;
-	A6E::Gear.GearRightStatus = 1;
-	A6E::Gear.GearLeftStatus = 1;
+	A6E::Gear.initial(0);
 	A6E::EngineLeft.initialEngineState(1);
 	A6E::EngineRight.initialEngineState(1);
 }
 
 void ed_fm_hot_start_in_air()
 {
-	A6E::Gear.GearNoseStatus = 0;
-	A6E::Gear.GearRightStatus = 0;
-	A6E::Gear.GearLeftStatus = 0;
+	A6E::Gear.initial(1);
 	A6E::EngineLeft.initialEngineState(1);
 	A6E::EngineRight.initialEngineState(1);
 }
@@ -869,4 +896,47 @@ bool ed_fm_pop_simulation_event (ed_fm_simulation_event & out)
 bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in)
 {
 	return false;
+}
+
+void ed_fm_suspension_feedback(int index, const ed_fm_suspension_info * info)
+{
+	switch (index)
+	{
+	case 0: // nose wheel
+		/* code */
+		A6E::Gear.nose.weightOnWheel = info->acting_force[1];
+		if (A6E::Gear.nose.Steering == 0) // wheel steering is off, thus hydrolic is disengage
+		// stop using this for unexpected issue
+		{
+			if (info->acting_force[3] > 500) // wheel will rotate left
+			{
+				//A6E::Gear.nose.currentYaw += 0.003;
+			}
+			else if (info->acting_force[3]< 0)
+			{
+				//A6E::Gear.nose.currentYaw -= 0.003;
+			}
+		}
+		A6E::Gear.nose.updateYawPosition(0);
+		if (A6E::Gear.nose.currentYaw > 500)
+		{
+			/* code */
+			A6E::Gear.nose.currentYaw = 1;
+		}
+		else if (A6E::Gear.nose.currentYaw < -1)
+		{
+			/* code */
+			A6E::Gear.nose.currentYaw = -1;
+		}
+		break;
+	case 1: // right wheel
+		A6E::Gear.right.weightOnWheel = info->acting_force[1];
+		break;
+	case 2: // left wheel
+		A6E::Gear.left.weightOnWheel = info->acting_force[1];
+		break;
+
+	default:
+		break;
+	}
 }
