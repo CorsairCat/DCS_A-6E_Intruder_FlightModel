@@ -21,7 +21,7 @@ private:
     double ki = 0.003/44000;
     double kd = 0.006/44000;
     double kc = 80000;
-    double antiI = 0;
+    double antiI = 0;// 积分饱和记录器
     double I_counter = 0;
     double I_counter_lasttime = 0; // 防止积分饱和的记录上一次积分值
     double FuelFlowStep = 0.1; // 变化率为 0.1 kg/sec

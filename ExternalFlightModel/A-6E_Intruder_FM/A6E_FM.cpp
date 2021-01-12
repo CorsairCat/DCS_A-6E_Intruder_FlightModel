@@ -10,6 +10,7 @@
 #include "Interface/A6eInterface.h"
 #include "Mechanic/A6eGear.h"
 #include "Engine/A6eEngine.h"
+#include "Motion/A6eFlightControl.h"
 
 namespace A6E
 {
@@ -20,6 +21,7 @@ namespace A6E
 	A6eGearSystem Gear;
 	A6eEngineSystem EngineLeft;
 	A6eEngineSystem EngineRight;
+	A6eFlightControl FlightControl;
 }
 
 // template 给的参考算法
@@ -38,6 +40,8 @@ double  fuel_consumption_since_last_time  = 0;
 double  atmosphere_density = 0;
 double  aoa = 0;
 double  speed_of_sound = 320;
+
+double test_nosewheel = 0;
 
 float 	test_ptn_521 = 0;
 
@@ -294,7 +298,14 @@ void ed_fm_simulate(double dt)
 	A6E::EngineRight.getEngineNetThrust(V_scalar);
 
 	// End of Throttle Control
-	
+
+	// Start of Flight Control
+	A6E::FlightControl.updateDuringSimulation();
+	// End of Flight Control
+
+
+	stick_roll = A6E::FlightControl.exportRoll();
+	stick_pitch = A6E::FlightControl.exportPitch();
 	Vec3 thrust_pos(A6E::emptyCG.x,A6E::emptyCG.y,A6E::emptyCG.z);
 	Vec3 thrust(A6E::EngineLeft.netThrust + A6E::EngineRight.netThrust , 0 , 0);
 	//A6E::EngineLeft.netThrust + A6E::EngineRight.netThrust
@@ -493,11 +504,71 @@ void ed_fm_set_command (int command,
 	// Control Stick Control
 	else if (command == 2001)//iCommandPlanePitch
 	{
-		stick_pitch		  = value;
+		A6E::FlightControl.inputPitch(value);
 	}
 	else if (command == 2002)//iCommandPlaneRoll
 	{
-		stick_roll		  = value;
+		A6E::FlightControl.inputRoll(value);
+	}
+	else if (command == 2003) //iCommandPlaneRudder
+	{
+		A6E::FlightControl.inputYaw(value);
+	}
+	else if (command == 197) //left start bank left
+	{
+		/* code */
+		A6E::FlightControl.inputRollKeyboard = -1;
+	}
+	else if (command == 198) //left stop bank left stop
+	{
+		/* code */
+		A6E::FlightControl.inputRollKeyboard = 0;
+	}
+	else if (command == 199) //right start bank right
+	{
+		/* code */
+		A6E::FlightControl.inputRollKeyboard = 1;
+	}
+	else if (command == 200) //right stop bank right stop
+	{
+		/* code */
+		A6E::FlightControl.inputRollKeyboard = 0;
+	}
+	else if (command == 201) //left rudder
+	{
+		/* code */
+		A6E::FlightControl.inputYawKeyboard = -1;
+	}
+	else if (command == 202) //left rudder stop
+	{
+		A6E::FlightControl.inputYawKeyboard = 0;
+	}
+	else if (command == 203) //right rudder 
+	{
+		/* code */
+		A6E::FlightControl.inputYawKeyboard = 1;
+	}
+	else if (command == 204) //right rudder stop
+	{
+		A6E::FlightControl.inputYawKeyboard = 0;
+	}
+	else if (command == 193) //up 
+	{
+		/* code */
+		A6E::FlightControl.inputPitchKeyboard = -1;
+	}
+	else if (command == 194) //up stop
+	{
+		A6E::FlightControl.inputPitchKeyboard = 0;
+	}
+	else if (command == 195) //down
+	{
+		/* code */
+		A6E::FlightControl.inputPitchKeyboard = 1;
+	}
+	else if (command == 196) //down stop
+	{
+		A6E::FlightControl.inputPitchKeyboard = 0;
 	}
 }
 /*
@@ -622,6 +693,7 @@ void ed_fm_set_draw_args (EdDrawArgument * drawargs,size_t size)
 		A6E::Gear.GearRightStatus = drawargs[3].f;
 		A6E::Gear.GearLeftStatus = drawargs[5].f;
 	}
+	test_nosewheel = drawargs[2].f;
 	
 }
 
@@ -702,26 +774,28 @@ double ed_fm_get_param(unsigned index)
 			return 0;
 		// Gear
 		case ED_FM_SUSPENSION_0_RELATIVE_BRAKE_MOMENT:
-			return 30000;
+			return 0;
 		case ED_FM_SUSPENSION_0_GEAR_POST_STATE:
 			return A6E::Gear.GearNoseStatus;
-			//break;
+			//break;test_nosewheel
+		case ED_FM_SUSPENSION_0_WHEEL_YAW:
+			return A6E::FlightControl.exportYaw();
 		case ED_FM_SUSPENSION_1_RELATIVE_BRAKE_MOMENT:
-			return 30000;
+			return 0;
 		case ED_FM_SUSPENSION_1_GEAR_POST_STATE:
 			return A6E::Gear.GearRightStatus;
 			//break;
 		case ED_FM_SUSPENSION_2_RELATIVE_BRAKE_MOMENT:
-			return 30000;
+			return 0;
 		case ED_FM_SUSPENSION_2_GEAR_POST_STATE:
 			return A6E::Gear.GearLeftStatus;
 			//break;
 		case ED_FM_FC3_STICK_PITCH:
-			return stick_pitch;
+			return A6E::FlightControl.exportRoll() * 100;
 		case ED_FM_FC3_STICK_ROLL:
-			return stick_roll;
-		//case ED_FM_FC3_RUDDER_PEDALS:
-
+			return A6E::FlightControl.exportPitch() * 100;
+		case ED_FM_FC3_RUDDER_PEDALS:
+			return A6E::FlightControl.exportYaw() * 100;
 		//case ED_FM_FC3_THROTTLE_LEFT:
 
 		//case ED_FM_FC3_THROTTLE_RIGHT:
