@@ -16,7 +16,7 @@ namespace A6E
 {
 	// A6eAtmosphere Atmos;
 	int IS_INIT = 1;
-	Vec3 emptyCG = {5.8784 - 4.572, -0.7883, 0};
+	Vec3 emptyCG = {0, 0, 0};//{5.8784 - 4.572, -0.7883, 0};
 	A6eInterface Interface;
 	A6eGearSystem Gear;
 	A6eEngineSystem EngineLeft;
