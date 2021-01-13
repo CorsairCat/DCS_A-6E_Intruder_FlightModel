@@ -16,11 +16,11 @@ public:
     double weightOnWheel;
     double currentYaw = 0;
 
-    void updateYawPosition(double inputRudder)
+    void updateYawPosition(double inputRudder, double airspeed)
     {
-        if (GearStatus >= 0.8 && Steering == 1)
+        if (GearStatus >= 0.8 && Steering == 1 && airspeed < 40)
         {   
-            yawPositionTarget = - inputRudder;
+            yawPositionTarget = (- inputRudder) * (40 - airspeed)/40;
         }
         else
         {

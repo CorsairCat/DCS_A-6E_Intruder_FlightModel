@@ -304,7 +304,7 @@ void ed_fm_simulate(double dt)
 	// End of Flight Control
 
 	// Engage for Gear Yaw update;
-	A6E::Gear.nose.updateYawPosition(A6E::FlightControl.exportYaw());
+	A6E::Gear.nose.updateYawPosition(A6E::FlightControl.exportYaw(), V_scalar);
 	A6E::Gear.nose.updateCurrentYaw();
 	// End of gear update
 
@@ -338,7 +338,7 @@ void ed_fm_simulate(double dt)
 	Vec3 aerodynamic_force(-Drag , Lift , 0 );
 	Vec3 aerodynamic_force_pos(1.0,0,0);
 
-	add_local_force(aerodynamic_force,aerodynamic_force_pos);
+	//add_local_force(aerodynamic_force,aerodynamic_force_pos);
 	add_local_force(thrust			 ,thrust_pos);
 
 	Vec3 aileron_left (0 , 0.05 * Cy * (stick_roll) * q * S , 0 );
@@ -348,8 +348,8 @@ void ed_fm_simulate(double dt)
 	Vec3 aileron_right_pos(0,0, 5.0);
 
 
-	add_local_force(aileron_left ,aileron_left_pos);
-	add_local_force(aileron_right,aileron_right_pos);
+	//add_local_force(aileron_left ,aileron_left_pos);
+	//add_local_force(aileron_right,aileron_right_pos);
 
 	simulate_fuel_consumption(dt);
 }
@@ -638,10 +638,10 @@ bool ed_fm_change_mass  (double & delta_mass,
 {
 	if (fuel_consumption_since_last_time > 0)
 	{
-		delta_mass		 = fuel_consumption_since_last_time;
-		delta_mass_pos_x = -1.0;
-		delta_mass_pos_y =  1.0;
-		delta_mass_pos_z =  0;
+		//delta_mass		 = fuel_consumption_since_last_time;
+		//delta_mass_pos_x = -1.0;
+		//delta_mass_pos_y =  1.0;
+		//delta_mass_pos_z =  0;
 
 		delta_mass_moment_of_inertia_x	= 0;
 		delta_mass_moment_of_inertia_y	= 0;
@@ -814,12 +814,12 @@ double ed_fm_get_param(unsigned index)
 		case ED_FM_SUSPENSION_0_WHEEL_YAW:
 			return A6E::Gear.nose.currentYaw;
 		case ED_FM_SUSPENSION_1_RELATIVE_BRAKE_MOMENT:
-			return A6E::Gear.right.BrakeStatusMultiPlier * 25000;
+			return A6E::Gear.right.BrakeStatusMultiPlier;
 		case ED_FM_SUSPENSION_1_GEAR_POST_STATE:
 			return A6E::Gear.right.GearStatus;
 			//break;
 		case ED_FM_SUSPENSION_2_RELATIVE_BRAKE_MOMENT:
-			return A6E::Gear.left.BrakeStatusMultiPlier * 25000;
+			return A6E::Gear.left.BrakeStatusMultiPlier;
 		case ED_FM_SUSPENSION_2_GEAR_POST_STATE:
 			return A6E::Gear.left.GearStatus;
 			//break;
@@ -861,12 +861,13 @@ void ed_fm_hot_start_in_air()
 
 bool ed_fm_enable_debug_info()
 {
-	return false;
+	return true;
 }
 
 size_t ed_fm_debug_watch(int level, char *buffer, size_t maxlen)
 {
-	return sprintf_s(buffer,maxlen,"TempParameter: %f,", A6E::EngineLeft.throttlePosition);;
+	sprintf(buffer, "TempParameter: TEST");
+	return 30;
 }
 
 // 维修和损伤
@@ -917,7 +918,7 @@ void ed_fm_suspension_feedback(int index, const ed_fm_suspension_info * info)
 				//A6E::Gear.nose.currentYaw -= 0.003;
 			}
 		}
-		A6E::Gear.nose.updateYawPosition(0);
+		A6E::Gear.nose.updateYawPosition(0,0);
 		if (A6E::Gear.nose.currentYaw > 500)
 		{
 			/* code */
@@ -931,9 +932,11 @@ void ed_fm_suspension_feedback(int index, const ed_fm_suspension_info * info)
 		break;
 	case 1: // right wheel
 		A6E::Gear.right.weightOnWheel = info->acting_force[1];
+		A6E::Interface.setParamValue("WOWR", A6E::Gear.right.weightOnWheel);
 		break;
 	case 2: // left wheel
 		A6E::Gear.left.weightOnWheel = info->acting_force[1];
+		A6E::Interface.setParamValue("WOWL", A6E::Gear.right.weightOnWheel);
 		break;
 
 	default:
