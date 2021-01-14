@@ -11,6 +11,7 @@
 #include "Mechanic/A6eGear.h"
 #include "Engine/A6eEngine.h"
 #include "Motion/A6eFlightControl.h"
+#include "Motion/A6eAeroDynamic.h"
 
 namespace A6E
 {
@@ -22,6 +23,7 @@ namespace A6E
 	A6eEngineSystem EngineLeft;
 	A6eEngineSystem EngineRight;
 	A6eFlightControl FlightControl;
+	A6eAeroDynamic AeroForce;
 }
 
 // template 给的参考算法
@@ -365,12 +367,15 @@ void ed_fm_set_atmosphere(double h,//altitude above sea level
 							double wind_vz //components of velocity vector, including turbulence in world coordinate system
 						)
 {
-	wind.x = wind_vx;
-	wind.y = wind_vy;
-	wind.z = wind_vz;
+	// set up for aerodynamic force calculation
+	A6E::AeroForce.AirDensity = ro;
+	A6E::AeroForce.AirPressure = p;
+	A6E::AeroForce.SpeedOfSound = a;
 
-	atmosphere_density = ro;
-	speed_of_sound     = a;
+	// transfer the control surface position
+	A6E::AeroForce.AlieronPos = A6E::FlightControl.exportRoll();
+	A6E::AeroForce.ElevatorPos = A6E::FlightControl.exportPitch();
+	A6E::AeroForce.RudderPos = A6E::FlightControl.exportYaw();
 }
 
 /*
@@ -444,7 +449,14 @@ void ed_fm_set_current_state_body_axis(double ax,//linear acceleration component
 	double common_angle_of_slide   //AoS radians
 	)
 {
-	aoa = common_angle_of_attack;
+	// get wind data from self body axis
+	A6E::AeroForce.WindAround.x = wind_vx;
+	A6E::AeroForce.WindAround.y = wind_vy;
+	A6E::AeroForce.WindAround.z = wind_vz;
+
+	A6E::AeroForce.AngleOfAttack = common_angle_of_attack;
+	A6E::AeroForce.AngleOfSlide = common_angle_of_slide;
+
 }
 
 /*
