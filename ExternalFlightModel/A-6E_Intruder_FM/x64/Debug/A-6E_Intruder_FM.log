@@ -5,8 +5,8 @@ T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_F
 T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\Engine\A6eEngine.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\Engine\J52Constant.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\Motion\A6eFlightControl.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(785,33): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(786,34): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(787,33): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(937,2): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(800,33): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(801,34): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(802,33): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\ExternalFlightModel\A-6E_Intruder_FM\A6E_FM.cpp(952,2): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   A-6E_Intruder_FM.vcxproj -> T:\DCS_Project\DCS_A-6E_Intruder_FlightModel\bin\x86_64\vc100.debug\A-6E_Intruder_FM.dll

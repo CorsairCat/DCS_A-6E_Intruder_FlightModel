@@ -7,7 +7,7 @@ namespace A6EBaseAeroData
     const double wingArea = 49.136418 / 2; //in m^2, one side; 528.9 ft^2
     const double ReNum = 45375097; // Rey currently
     const double VerticalTailArea = 2.6576; // in m^2 3.6576; 
-    const double HorizontalTailArea = 7.575171; // in m^2 7.575171;
+    const double HorizontalTailArea = 6.575171; // in m^2 7.575171;
     const Vec3 WingLForcePos = {-1, 0, -4.5};
     const Vec3 WingRForcePos = {-1, 0, 4.5};
     const Vec3 TailHForcePos = {-8, 0.5, 0};

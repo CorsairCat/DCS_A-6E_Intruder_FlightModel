@@ -297,6 +297,16 @@ bool ed_fm_add_local_force_component(double & x,double &y,double &z,double & pos
 		A6E::Force_Return_Counter += 1;
 		return true;
 		break;
+	case 7: // drag v tail
+		x = A6E::AeroForce.DragVTail.x;
+		y = A6E::AeroForce.DragVTail.y;
+		z = A6E::AeroForce.DragVTail.z;
+		pos_x = A6EBaseAeroData::TailVForcePos.x;
+		pos_y = A6EBaseAeroData::TailVForcePos.y;
+		pos_z = A6EBaseAeroData::TailVForcePos.z;
+		A6E::Force_Return_Counter += 1;
+		return true;
+		break;
 	default: //
 		x = 0;
 		y = 0;
@@ -397,6 +407,7 @@ void ed_fm_simulate(double dt)
 	A6E::AeroForce.CalHTailLift();
 	A6E::AeroForce.CalVTailLift();
 	A6E::AeroForce.CalCenterDrag();
+	A6E::AeroForce.CalVtailDrag();
 
 	//end of calculate aero force
 
@@ -511,6 +522,10 @@ void ed_fm_set_current_state_body_axis(double ax,//linear acceleration component
 
 	A6E::AeroForce.AngleOfAttack = common_angle_of_attack * 57.2958;
 	A6E::AeroForce.AngleOfSlide = common_angle_of_slide * 57.2958;
+
+	A6E::AeroForce.Angle_v_Yaw = omegay;
+	A6E::AeroForce.Angle_v_Roll = omegax;
+	A6E::AeroForce.Angle_v_Pitch = omegaz;
 
 }
 
