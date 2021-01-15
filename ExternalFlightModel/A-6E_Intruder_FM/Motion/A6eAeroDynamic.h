@@ -82,11 +82,11 @@ public:
         double correctedAOAWing = AngleOfAttack + 2;
         if (Pos == 0)
         {
-            correctedAOAWing = correctedAOAWing + AlieronPos * 1; 
+            correctedAOAWing = correctedAOAWing + AlieronPos * 0.3; 
         }
         else
         {
-            correctedAOAWing = correctedAOAWing - AlieronPos * 1; 
+            correctedAOAWing = correctedAOAWing - AlieronPos * 0.3; 
         }
         if (correctedAOAWing > 180)
         {
@@ -97,7 +97,7 @@ public:
             correctedAOAWing = correctedAOAWing + 360;
         }
         double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::wingArea * getClfromAOA(correctedAOAWing);
-        LiftForceWing[Pos].z = WingLift * WindAround.z / FlowSpeed;
+        LiftForceWing[Pos].z = 0; //WingLift * WindAround.z / FlowSpeed; this part is not for lift
         LiftForceWing[Pos].y = WingLift * WindAround.x / FlowSpeed;
         LiftForceWing[Pos].x = - WingLift * WindAround.y / FlowSpeed;
     }
@@ -114,7 +114,7 @@ public:
             correctedAOAWing = correctedAOAWing + 360;
         }
         double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::HorizontalTailArea * getClfromAOA(correctedAOAWing);
-        LiftForceHTail.z = WingLift * WindAround.z / FlowSpeed;
+        LiftForceHTail.z = 0; //WingLift * WindAround.z / FlowSpeed; this part wont gene lift
         LiftForceHTail.y = WingLift * WindAround.x / FlowSpeed;
         LiftForceHTail.x = - WingLift * WindAround.y / FlowSpeed;
     }
@@ -131,7 +131,7 @@ public:
             correctedAOAWing = correctedAOAWing + 360;
         }
         double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::VerticalTailArea * getClfromAOA(correctedAOAWing);
-        LiftSideForceVTail.y = WingLift * WindAround.y / FlowSpeed;
+        LiftSideForceVTail.y = 0; //WingLift * WindAround.y / FlowSpeed; this part wont have lift
         LiftSideForceVTail.z = WingLift * WindAround.x / FlowSpeed;
         LiftSideForceVTail.x = - WingLift * WindAround.z / FlowSpeed;
     }
