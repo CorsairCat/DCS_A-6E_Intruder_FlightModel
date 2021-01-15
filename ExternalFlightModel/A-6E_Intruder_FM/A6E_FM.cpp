@@ -17,6 +17,7 @@ namespace A6E
 {
 	// A6eAtmosphere Atmos;
 	int IS_INIT = 1;
+	int Force_Return_Counter = 0;
 	Vec3 emptyCG = {0, 0, 0};//{5.8784 - 4.572, -0.7883, 0};
 	A6eInterface Interface;
 	A6eGearSystem Gear;
@@ -213,12 +214,6 @@ void simulate_fuel_consumption(double dt)
 // 每帧之后运算，用来让气动模型把当前的作用力(可能是所有力的矢量和)和重心位置（是合力位置，F16 模组描述不明确， 参考前面的英文提示）传递给dcs
 void ed_fm_add_local_force(double & x,double &y,double &z,double & pos_x,double & pos_y,double & pos_z)
 {
-	x = common_force.x;
-	y = common_force.y;
-	z = common_force.z;
-	pos_x = center_of_gravity.x;
-	pos_y = center_of_gravity.y;
-	pos_z = center_of_gravity.z;
 }
 // 全局力，不知道是啥
 void ed_fm_add_global_force(double & x,double &y,double &z,double & pos_x,double & pos_y,double & pos_z)
@@ -230,7 +225,88 @@ void ed_fm_add_global_force(double & x,double &y,double &z,double & pos_x,double
 // 与上面两个add force 相同的函数，但是用的是“组件形式”（不知道是哪里的术语），函数会保持请求直到返回真（？？？16为啥返回的否
 bool ed_fm_add_local_force_component(double & x,double &y,double &z,double & pos_x,double & pos_y,double & pos_z)
 {
-	return false;
+	switch (A6E::Force_Return_Counter)
+	{
+	case 0: // thrust left
+		x = A6E::EngineLeft.netThrust;
+		y = 0;
+		z = 0;
+		pos_x = A6EBaseAeroData::LThrustForcePos.x;
+		pos_y = A6EBaseAeroData::LThrustForcePos.y;
+		pos_z = A6EBaseAeroData::LThrustForcePos.z;
+		A6E::Force_Return_Counter += 1;
+		return true;
+		break;
+	case 1: // thrust right
+		x = A6E::EngineRight.netThrust;
+		y = 0;
+		z = 0;
+		pos_x = A6EBaseAeroData::RThrustForcePos.x;
+		pos_y = A6EBaseAeroData::RThrustForcePos.y;
+		pos_z = A6EBaseAeroData::RThrustForcePos.z;
+		A6E::Force_Return_Counter += 1;
+		return true;
+		break;
+	case 2: // wing left
+		x = A6E::AeroForce.LiftForceWing[0].x;
+		y = A6E::AeroForce.LiftForceWing[0].y;
+		z = A6E::AeroForce.LiftForceWing[0].z;
+		pos_x = A6EBaseAeroData::WingLForcePos.x;
+		pos_y = A6EBaseAeroData::WingLForcePos.y;
+		pos_z = A6EBaseAeroData::WingLForcePos.z;
+		A6E::Force_Return_Counter += 1;
+		return true;
+		break;
+	case 3: // wing right
+		x = A6E::AeroForce.LiftForceWing[1].x;
+		y = A6E::AeroForce.LiftForceWing[1].y;
+		z = A6E::AeroForce.LiftForceWing[1].z;
+		pos_x = A6EBaseAeroData::WingRForcePos.x;
+		pos_y = A6EBaseAeroData::WingRForcePos.y;
+		pos_z = A6EBaseAeroData::WingRForcePos.z;
+		A6E::Force_Return_Counter += 1;
+		return true;
+		break;
+	case 4: // horizontal tail
+		x = A6E::AeroForce.LiftForceHTail.x;
+		y = A6E::AeroForce.LiftForceHTail.y;
+		z = A6E::AeroForce.LiftForceHTail.z;
+		pos_x = A6EBaseAeroData::TailHForcePos.x;
+		pos_y = A6EBaseAeroData::TailHForcePos.y;
+		pos_z = A6EBaseAeroData::TailHForcePos.z;
+		A6E::Force_Return_Counter += 1;
+		return true;
+		break;
+	case 5: // vertical tail
+		x = A6E::AeroForce.LiftSideForceVTail.x;
+		y = A6E::AeroForce.LiftSideForceVTail.y;
+		z = A6E::AeroForce.LiftSideForceVTail.z;
+		pos_x = A6EBaseAeroData::TailVForcePos.x;
+		pos_y = A6EBaseAeroData::TailVForcePos.y;
+		pos_z = A6EBaseAeroData::TailVForcePos.z;
+		A6E::Force_Return_Counter += 1;
+		return true;
+		break;
+	case 6: // drag fuselarge
+		x = A6E::AeroForce.TotalDragWnF.x;
+		y = A6E::AeroForce.TotalDragWnF.y;
+		z = A6E::AeroForce.TotalDragWnF.z;
+		pos_x = A6EBaseAeroData::CenterForcePos.x;
+		pos_y = A6EBaseAeroData::CenterForcePos.y;
+		pos_z = A6EBaseAeroData::CenterForcePos.z;
+		A6E::Force_Return_Counter += 1;
+		return true;
+		break;
+	default: //
+		x = 0;
+		y = 0;
+		z = 0;
+		pos_x = 0;
+		pos_y = 0;
+		pos_z = 0;
+		return false;
+		break;
+	} 
 }
 bool ed_fm_add_global_force_component(double & x,double &y,double &z,double & pos_x,double & pos_y,double & pos_z)
 {
@@ -240,9 +316,6 @@ bool ed_fm_add_global_force_component(double & x,double &y,double &z,double & po
 // 反馈力矩信息，决定pitch的，全局力矩还是不知道是啥用的
 void ed_fm_add_local_moment(double & x,double &y,double &z)
 {
-	x = common_moment.x;
-	y = common_moment.y;
-	z = common_moment.z;
 }
 
 void ed_fm_add_global_moment(double & x,double &y,double &z)
@@ -266,6 +339,7 @@ bool ed_fm_add_global_moment_component(double & x,double &y,double &z)
 
 void ed_fm_simulate(double dt)
 {
+	A6E::Force_Return_Counter = 0;
 
 	common_force  = Vec3();
 	common_moment = Vec3();
@@ -296,8 +370,8 @@ void ed_fm_simulate(double dt)
 	A6E::EngineLeft.updateIdleState(A6E::Interface.getParamValue("LeftThrottor"));
 	A6E::EngineRight.updateIdleState(A6E::Interface.getParamValue("RightThrottor"));
 	// update thrust
-	A6E::EngineLeft.getEngineNetThrust(V_scalar);
-	A6E::EngineRight.getEngineNetThrust(V_scalar);
+	A6E::EngineLeft.getEngineNetThrust(A6E::AeroForce.FlowSpeed);
+	A6E::EngineRight.getEngineNetThrust(A6E::AeroForce.FlowSpeed);
 
 	// End of Throttle Control
 
@@ -306,52 +380,31 @@ void ed_fm_simulate(double dt)
 	// End of Flight Control
 
 	// Engage for Gear Yaw update;
-	A6E::Gear.nose.updateYawPosition(A6E::FlightControl.exportYaw(), V_scalar);
+	A6E::Gear.nose.updateYawPosition(A6E::FlightControl.exportYaw(), A6E::AeroForce.FlowSpeed);
 	A6E::Gear.nose.updateCurrentYaw();
 	// End of gear update
 
+	//update aero base data
+	A6E::AeroForce.CurrentMach = A6E::AeroForce.FlowSpeed / A6E::AeroForce.SpeedOfSound;
+	A6E::AeroForce.AlieronPos = A6E::FlightControl.exportRoll();
+	A6E::AeroForce.ElevatorPos = A6E::FlightControl.exportPitch();
+	A6E::AeroForce.RudderPos = A6E::FlightControl.exportYaw();
 
-	stick_roll = A6E::FlightControl.exportRoll();
-	stick_pitch = A6E::FlightControl.exportPitch();
-	Vec3 thrust_pos(A6E::emptyCG.x,A6E::emptyCG.y,A6E::emptyCG.z);
-	Vec3 thrust(A6E::EngineLeft.netThrust + A6E::EngineRight.netThrust , 0 , 0);
+	//end of aero base setup
+	//start of calculate aero force
+	A6E::AeroForce.CalWingLift(0);
+	A6E::AeroForce.CalWingLift(1);
+	A6E::AeroForce.CalHTailLift();
+	A6E::AeroForce.CalVTailLift();
+	A6E::AeroForce.CalCenterDrag();
+
+	//end of calculate aero force
+
+	// stick_roll = A6E::FlightControl.exportRoll();
+	// stick_pitch = A6E::FlightControl.exportPitch();
+	// Vec3 thrust_pos(A6E::emptyCG.x,A6E::emptyCG.y,A6E::emptyCG.z);
+	// Vec3 thrust(A6E::EngineLeft.netThrust + A6E::EngineRight.netThrust , 0 , 0);
 	//A6E::EngineLeft.netThrust + A6E::EngineRight.netThrust
-
-	double CyAlpha_ = lerp(mach_table,Cya  ,sizeof(mach_table)/sizeof(double),Mach);
-	double Cx0_     = lerp(mach_table,cx0  ,sizeof(mach_table)/sizeof(double),Mach);
-	double CyMax_   = lerp(mach_table,CyMax,sizeof(mach_table)/sizeof(double),Mach);
-	double B_	    = lerp(mach_table,B    ,sizeof(mach_table)/sizeof(double),Mach);
-	double B4_	    = lerp(mach_table,B4   ,sizeof(mach_table)/sizeof(double),Mach);
-
-
-	double Cy  = (CyAlpha_ * 57.3) * aoa;
-	if (fabs(aoa) > 90/57.3)
-		Cy = 0;
-	if (Cy > CyMax_)
-		Cy = CyMax_;
-
-	double Cx  = 0.05 + B_ * Cy * Cy + B4_ * Cy * Cy * Cy * Cy;
-
-	double q	   =  0.5 * atmosphere_density * V_scalar * V_scalar;
-	const double S = 25;
-	double Lift =  Cy * q * S;
-	double Drag =  Cx * q * S;
-	
-	Vec3 aerodynamic_force(-Drag , Lift , 0 );
-	Vec3 aerodynamic_force_pos(1.0,0,0);
-
-	//add_local_force(aerodynamic_force,aerodynamic_force_pos);
-	add_local_force(thrust			 ,thrust_pos);
-
-	Vec3 aileron_left (0 , 0.05 * Cy * (stick_roll) * q * S , 0 );
-	Vec3 aileron_right(0 ,-0.05 * Cy * (stick_roll) * q * S , 0 );
-
-	Vec3 aileron_left_pos(0,0,-5.0);
-	Vec3 aileron_right_pos(0,0, 5.0);
-
-
-	//add_local_force(aileron_left ,aileron_left_pos);
-	//add_local_force(aileron_right,aileron_right_pos);
 
 	simulate_fuel_consumption(dt);
 }
@@ -450,12 +503,14 @@ void ed_fm_set_current_state_body_axis(double ax,//linear acceleration component
 	)
 {
 	// get wind data from self body axis
-	A6E::AeroForce.WindAround.x = wind_vx;
-	A6E::AeroForce.WindAround.y = wind_vy;
-	A6E::AeroForce.WindAround.z = wind_vz;
+	A6E::AeroForce.WindAround.x = vx - wind_vx;
+	A6E::AeroForce.WindAround.y = vy - wind_vy;
+	A6E::AeroForce.WindAround.z = vz - wind_vz;
 
-	A6E::AeroForce.AngleOfAttack = common_angle_of_attack;
-	A6E::AeroForce.AngleOfSlide = common_angle_of_slide;
+	A6E::AeroForce.FlowSpeed = sqrt(A6E::AeroForce.WindAround.x * A6E::AeroForce.WindAround.x + A6E::AeroForce.WindAround.y *A6E::AeroForce.WindAround.y + A6E::AeroForce.WindAround.z * A6E::AeroForce.WindAround.z);
+
+	A6E::AeroForce.AngleOfAttack = common_angle_of_attack * 57.2958;
+	A6E::AeroForce.AngleOfSlide = common_angle_of_slide * 57.2958;
 
 }
 
@@ -869,6 +924,7 @@ void ed_fm_hot_start_in_air()
 	A6E::Gear.initial(1);
 	A6E::EngineLeft.initialEngineState(1);
 	A6E::EngineRight.initialEngineState(1);
+	//A6E::AeroForce.WindAround = {150, 0, 0};
 }
 
 bool ed_fm_enable_debug_info()
