@@ -6,15 +6,15 @@ namespace A6EBaseAeroData
     const double macChordLength = 3.32232; //in m; 130.8 inches
     const double wingArea = 49.136418 / 2; //in m^2, one side; 528.9 ft^2
     const double ReNum = 45375097; // Rey currently
-    const double VerticalTailArea = 2.6576; // in m^2 3.6576; 
-    const double HorizontalTailArea = 6.575171; // in m^2 7.575171;
-    const Vec3 WingLForcePos = {-1, 0, -4.5};
-    const Vec3 WingRForcePos = {-1, 0, 4.5};
-    const Vec3 TailHForcePos = {-8, 0.5, 0};
-    const Vec3 TailVForcePos = {-8.25, 2, 0};
-    const Vec3 CenterForcePos = {-1, 0, 0};
-    const Vec3 LThrustForcePos = {-1, -0.5, -1};
-    const Vec3 RThrustForcePos = {-1, -0.5, 1};
+    const double VerticalTailArea = 6.35; // in m^2 3.6576; 
+    const double HorizontalTailArea = 11.1484; // in m^2 7.575171;
+    const Vec3 WingLForcePos = {-0.3, 0, -4.5};
+    const Vec3 WingRForcePos = {-0.3, 0, 4.5};
+    const Vec3 TailHForcePos = {-7.6, 0.5, 0};
+    const Vec3 TailVForcePos = {-7.85, 2, 0};
+    const Vec3 CenterForcePos = {0, 0, 0};
+    const Vec3 LThrustForcePos = {0, -0.5, -1};
+    const Vec3 RThrustForcePos = {0, -0.5, 1};
     // this is for convert cd and cl to calculate the drag and lift
     //                            {m0, m.1,m.2,m.3   , m.4   , m.5 , m.6 , m.7   , m.8  , m.9, m1 }
     const double CliftvsMachMulti[11] = {1, 1, 1.05, 1.155 , 1.2075, 1.20, 1.26, 1.3125, 1.575, 0.8, 1.06};

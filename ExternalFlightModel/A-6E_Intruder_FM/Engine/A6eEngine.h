@@ -286,7 +286,7 @@ public:
         {
             // in Starting Condition
              staticThrust = (CoreRPM / 6500 * 2000);
-            netThrust = - getAirFlowMassRate() * airspeed + staticThrust;
+            netThrust = staticThrust;
         }
         else if (CoreRPM <= 12500)
         {
