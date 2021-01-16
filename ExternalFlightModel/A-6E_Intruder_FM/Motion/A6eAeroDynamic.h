@@ -26,13 +26,20 @@ private:
             tempid = - (int)correctAOA;
             Cl = - (A6EBaseAeroData::ClofWing[tempid] + (A6EBaseAeroData::ClofWing[tempid + 1] - A6EBaseAeroData::ClofWing[tempid]) * (- correctAOA - tempid));
         }
-        tempid = (int)CurrentMach;
-        ClMultiplier = A6EBaseAeroData::CliftvsMachMulti[tempid] + (A6EBaseAeroData::CliftvsMachMulti[tempid + 1] - A6EBaseAeroData::CliftvsMachMulti[tempid]) * (CurrentMach - tempid);
+        tempid = (int)CurrentMach * 10;
+        if (tempid >= 10)
+        {
+            ClMultiplier = A6EBaseAeroData::CliftvsMachMulti[10];
+        }
+        else
+        {
+            ClMultiplier = A6EBaseAeroData::CliftvsMachMulti[tempid] + (A6EBaseAeroData::CliftvsMachMulti[tempid + 1] - A6EBaseAeroData::CliftvsMachMulti[tempid]) * (CurrentMach - tempid);
+        }
         Cl = Cl * ClMultiplier;
         return Cl;
     }
 
-    double getCdfromAOA(double correctAOA) // correct aoa is define by common aoa + install angle need in range [-180 180]
+    double getCdfromAOA(double correctAOA, double added_Cd) // correct aoa is define by common aoa + install angle need in range [-180 180]
     {
         int tempid = 0;
         double Cd = 0;
@@ -45,11 +52,20 @@ private:
         else
         {
             tempid = - (int)correctAOA;
-            Cd = - (A6EBaseAeroData::CdofWing[tempid] + (A6EBaseAeroData::CdofWing[tempid + 1] - A6EBaseAeroData::CdofWing[tempid]) * (- correctAOA - tempid));
+            Cd = (A6EBaseAeroData::CdofWing[tempid] + (A6EBaseAeroData::CdofWing[tempid + 1] - A6EBaseAeroData::CdofWing[tempid]) * (- correctAOA - tempid));
         }
-        tempid = (int)CurrentMach;
-        CdMultiplier = A6EBaseAeroData::CdragvsMachMulti[tempid] + (A6EBaseAeroData::CdragvsMachMulti[tempid + 1] - A6EBaseAeroData::CdragvsMachMulti[tempid]) * (CurrentMach - tempid);
-        Cd = Cd * CdMultiplier;
+        tempid = (int)CurrentMach * 10;
+        if (tempid >= 10)
+        {
+            /* code */
+            CdMultiplier = A6EBaseAeroData::CdragvsMachMulti[tempid] * CurrentMach;
+        }
+        else
+        {
+            /* code */
+            CdMultiplier = A6EBaseAeroData::CdragvsMachMulti[tempid] + (A6EBaseAeroData::CdragvsMachMulti[tempid + 1] - A6EBaseAeroData::CdragvsMachMulti[tempid]) * (CurrentMach - tempid);
+        }
+        Cd = - (Cd + added_Cd) * CdMultiplier;
         return Cd;
     }
 
@@ -187,7 +203,7 @@ public:
         {
             correctedAOAWing = correctedAOAWing + 360;
         }
-        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::wingArea * (getCdfromAOA(correctedAOAWing) + 0.3 * 0.14);
+        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::wingArea * 10 * getCdfromAOA(correctedAOAWing, 0);
         TotalDragWnF.z = WingLift * WindAround.z / FlowSpeed;
         TotalDragWnF.y = WingLift * WindAround.y / FlowSpeed;
         TotalDragWnF.x = WingLift * WindAround.x / FlowSpeed;
@@ -204,7 +220,7 @@ public:
         {
             correctedAOAWing = correctedAOAWing + 360;
         }
-        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::VerticalTailArea * getCdfromAOA(correctedAOAWing);
+        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::VerticalTailArea * getCdfromAOA(correctedAOAWing, 0);
         
         DragVTail.z = WingLift * WindAround.z / FlowSpeed;
         DragVTail.y = WingLift * WindAround.y / FlowSpeed;
@@ -222,7 +238,7 @@ public:
         {
             correctedAOAWing = correctedAOAWing + 360;
         }
-        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::wingArea * (getCdfromAOA(correctedAOAWing) + 0.3 * 0.14);
+        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::wingArea * (getCdfromAOA(correctedAOAWing, 0));
         TotalDragWnF.z = WingLift * WindAround.z / FlowSpeed;
         TotalDragWnF.y = WingLift * WindAround.y / FlowSpeed;
         TotalDragWnF.x = WingLift * WindAround.x / FlowSpeed;

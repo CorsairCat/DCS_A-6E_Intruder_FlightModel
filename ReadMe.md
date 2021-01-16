@@ -4,13 +4,12 @@
 
 ## TO-DO List
 > The Query is from 1 very ergent to max later
-1. Add function for engine fuel flow decrease and rpm decrease function
-2. Make suspension and wheel break available for ground operation
-3. Add Thrust acting position
-4. Add Fully Motion Control Class
-4. Add control operation for control surfaces
-5. Add Aerodynamic Date for all surfaces
-6. Add carrier operations
+1. Fix drag profile, current is bit too large;
+2. Fix the pitch control is not stable and will shake;
+3. Add the SpeedBrake, Flap and Gear Drag and Lift;
+4. Add the Engine Temperature output;
+5. Check the performance for turning;
+6. Add carrier operations;
 7. Overide fuel control system currently use
 8. Complete Autopilot Control in EFM
 9. Adding Bombing/Calculation System to EFM

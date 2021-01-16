@@ -18,7 +18,7 @@ namespace A6EBaseAeroData
     // this is for convert cd and cl to calculate the drag and lift
     //                            {m0, m.1,m.2,m.3   , m.4   , m.5 , m.6 , m.7   , m.8  , m.9, m1 }
     const double CliftvsMachMulti[11] = {1, 1, 1.05, 1.155 , 1.2075, 1.20, 1.26, 1.3125, 1.575, 0.8, 1.06};
-    const double CdragvsMachMulti[11] = {1, 1, 0.95, 1, 0.97, 0.99, 0.98, 0.996, 1.05, 3.6, 8.2};
+    const double CdragvsMachMulti[11] = {1, 1, 0.95, 1, 0.97, 0.99, 0.98, 0.996, 1.05, 8.8, 20.2};
 
     // Cv and Cd as a function of Angle of Attack;
     const double TopAreaOfFuse = 38.4048; 
