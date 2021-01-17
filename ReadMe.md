@@ -6,6 +6,7 @@
 ## Thanks to
 + Silent Eagle for some carrier launch sample
 + JNelson for he provided me a lot of good ideas and help
++ Duke for help in suspension things and some debugging functions
 
 ## TO-DO List
 > The Query is from 1 very ergent to max later
