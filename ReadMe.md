@@ -1,15 +1,20 @@
 # A-6E Intruder Mod's EFM for DCS World
 > + This is the source code for a-6e mod
 > + This is created from ed template
+> + This part will keeps update until it reaches expectations 
+
+## Thanks to
++ Silent Eagle for some carrier launch sample
++ JNelson for he provided me a lot of good ideas and help
 
 ## TO-DO List
 > The Query is from 1 very ergent to max later
-1. Fix drag profile, current is bit too large;
+1. Fix drag profile, current is bit too large;[done]
 2. Fix the pitch control is not stable and will shake;
 3. Add the SpeedBrake, Flap and Gear Drag and Lift;
 4. Add the Engine Temperature output;
 5. Check the performance for turning;
-6. Add carrier operations;
+6. Add carrier operations;[done]
 7. Overide fuel control system currently use
 8. Complete Autopilot Control in EFM
 9. Adding Bombing/Calculation System to EFM
