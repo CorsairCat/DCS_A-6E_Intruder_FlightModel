@@ -81,6 +81,8 @@ public:
     A6eGearWheel nose;
     A6eGearWheel left;
     A6eGearWheel right;
+    int CarrierPos = 0;
+
     void initial(int birth) // 0 for ground and 1 for air
     {   
         if (birth == 0)
@@ -95,6 +97,7 @@ public:
             left.GearStatus = 0;
             right.GearStatus = 0;
         }
+	    CarrierPos = 0;
     }
 
     void setWheelBrakes(double value)

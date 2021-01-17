@@ -16,7 +16,7 @@ private:
     double LastStickRollInput = 0;
     double LastStickYawInput = 0;
     double LastStickPitchInput = 0;
-    double moveRateManual = 0.01; 
+    double moveRateManual = 0.006; 
 public:
     int inputRollKeyboard = 0;
     int inputPitchKeyboard = 0;
@@ -162,6 +162,21 @@ public:
         {
             desiredYaw = -1;
         }
+    }
+
+    void initial()
+    {
+        desiredPitch = 0;
+        desiredRoll = 0;
+        desiredYaw = 0;
+        moveMaxRate = 0.2;
+        LastStickRollInput = 0;
+        LastStickYawInput = 0;
+        LastStickPitchInput = 0;
+        moveRateManual = 0.01;
+        inputRollKeyboard = 0;
+        inputPitchKeyboard = 0;
+        inputYawKeyboard = 0;
     }
 };
 

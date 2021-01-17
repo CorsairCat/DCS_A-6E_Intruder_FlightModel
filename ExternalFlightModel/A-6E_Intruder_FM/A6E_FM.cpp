@@ -540,19 +540,19 @@ void ed_fm_set_command (int command,
 	if (command == 2004)//iCommandPlaneThrustCommon
 	{
 		// throttle = 0.5 * (-value + 1.0);
-		A6E::EngineLeft.throttlePosition = value; // left_throttle_efm
-		A6E::EngineRight.throttlePosition = value;
+		A6E::EngineLeft.throttlePosition = (- value + 1) / 2; // left_throttle_efm
+		A6E::EngineRight.throttlePosition = (- value + 1) / 2;
 		A6E::Interface.setParamValue("EFM_LEFT_THRUST_A", A6E::EngineLeft.throttlePosition);
 		A6E::Interface.setParamValue("EFM_RIGHT_THRUST_A", A6E::EngineRight.throttlePosition);
 	}
 	else if (command == 2005)//left throttle axis
 	{
-		A6E::EngineLeft.throttlePosition = value; // left_throttle_efm
+		A6E::EngineLeft.throttlePosition = (- value + 1) / 2; // left_throttle_efm
 		A6E::Interface.setParamValue("EFM_LEFT_THRUST_A", A6E::EngineLeft.throttlePosition);
 	}
 	else if (command == 2006)//right throttle axis
 	{
-		A6E::EngineRight.throttlePosition = value;
+		A6E::EngineRight.throttlePosition = (- value + 1) / 2;
 		A6E::Interface.setParamValue("EFM_RIGHT_THRUST_A", A6E::EngineRight.throttlePosition);
 	}
 	else if (command == 1032)//iCommand Throttle Increase
@@ -810,6 +810,9 @@ void ed_fm_set_draw_args (EdDrawArgument * drawargs,size_t size)
 		A6E::Gear.right.GearStatus = drawargs[3].f;
 		A6E::Gear.left.GearStatus = drawargs[5].f;
 	}
+	A6E::AeroForce.flap_states = drawargs[9].f;
+    A6E::AeroForce.gear_states = A6E::Gear.nose.GearStatus;
+    A6E::AeroForce.brake_states = drawargs[21].f;
 }
 
 
@@ -821,7 +824,14 @@ void ed_fm_configure(const char * cfg_path)
 // 获取头部抖动情况
 double ed_fm_get_shake_amplitude()
 {
-	return 0;
+	if (A6E::AeroForce.brake_states > 0.2)
+	{
+		return A6E::AeroForce.brake_states * 0.2;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 // 基础的一些数据反馈例如引擎状况等
@@ -925,6 +935,8 @@ void ed_fm_cold_start()
 	A6E::Gear.initial(0);
 	A6E::EngineLeft.initialEngineState(0);
 	A6E::EngineRight.initialEngineState(0);
+	A6E::FlightControl.initial();
+	A6E::AeroForce.initial();
 }
 
 void ed_fm_hot_start()
@@ -932,6 +944,8 @@ void ed_fm_hot_start()
 	A6E::Gear.initial(0);
 	A6E::EngineLeft.initialEngineState(1);
 	A6E::EngineRight.initialEngineState(1);
+	A6E::FlightControl.initial();
+	A6E::AeroForce.initial();
 }
 
 void ed_fm_hot_start_in_air()
@@ -940,6 +954,8 @@ void ed_fm_hot_start_in_air()
 	A6E::EngineLeft.initialEngineState(1);
 	A6E::EngineRight.initialEngineState(1);
 	//A6E::AeroForce.WindAround = {150, 0, 0};
+	A6E::FlightControl.initial();
+	A6E::AeroForce.initial();
 }
 
 bool ed_fm_enable_debug_info()
@@ -973,12 +989,42 @@ bool ed_fm_need_to_be_repair()
 // 返回表示是否需要多个event响应
 bool ed_fm_pop_simulation_event (ed_fm_simulation_event & out)
 {
+	if (A6E::Gear.CarrierPos == 1)
+	{
+		if (A6E::EngineLeft.CoreRPM > 11800 && A6E::EngineRight.CoreRPM > 11800) // able to launch
+		{
+			out.event_type = ED_FM_EVENT_CARRIER_CATAPULT;
+			out.event_params[0] = 1;
+			out.event_params[1] = 3; //start delay [sec] 
+			out.event_params[2] = 80; //required velocity after takeoff [meters per sec] (+ with safety reserve; func of mass) 
+			out.event_params[3] = A6E::EngineLeft.netThrust * 0.5 * 2; //mean engines thrust during takeoff [N] (func of mass)
+			A6E::Gear.CarrierPos = 2;
+			return true;
+		}
+	}
 	return false;
 }
 
 	// bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in) // same as pop . but function direction is reversed -> DCS will call it for your FM when ingame event occurs
 bool ed_fm_push_simulation_event(const ed_fm_simulation_event & in)
 {
+	if (in.event_type == ED_FM_EVENT_CARRIER_CATAPULT)
+	{
+		if (in.event_params[0] == 1)
+		{
+			A6E::Gear.CarrierPos = 1; // locked to catapult
+		}
+		else if (in.event_params[0] == 2) // start launch
+		{
+			/* code */
+			A6E::Gear.CarrierPos = 3; // locked to catapult
+		}
+		else if (in.event_params[0] == 3) // launch finished
+		{
+			/* code */
+			A6E::Gear.CarrierPos = 0; // locked to catapult
+		}
+	}
 	return false;
 }
 

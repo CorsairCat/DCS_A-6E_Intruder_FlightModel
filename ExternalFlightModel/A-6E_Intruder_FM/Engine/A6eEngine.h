@@ -305,6 +305,9 @@ public:
 
     void initialEngineState(int BirthState) //0: cold; 1: hot
     {
+        throttlePosition = 0;
+        throttlePositionLastTime = 0;
+        throttleKeyBoard = 0;
         if (BirthState == 1)
         {
             throttleIdleState = 1;
