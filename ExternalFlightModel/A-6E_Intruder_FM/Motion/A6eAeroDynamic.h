@@ -213,7 +213,7 @@ public:
         }
         double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::VerticalTailArea * (getClfromAOA(correctedAOAWing) * 0.9);
         LiftSideForceVTail.y = 0; //WingLift * WindAround.y / FlowSpeed; this part wont have lift
-        LiftSideForceVTail.z = WingLift * WindAround.x / FlowSpeed - temp * AirDensity * (8.5 * Angle_v_Yaw - 2 * Angle_v_Roll) * (8.5 * Angle_v_Yaw - 2 * Angle_v_Roll) * 180 * A6EBaseAeroData::VerticalTailArea;
+        LiftSideForceVTail.z = WingLift * WindAround.x / FlowSpeed - temp * AirDensity * (8.5 * Angle_v_Yaw - 2 * Angle_v_Roll) * (8.5 * Angle_v_Yaw - 2 * Angle_v_Roll) * 1.5 * A6EBaseAeroData::VerticalTailArea;
         LiftSideForceVTail.x = - WingLift * WindAround.z / FlowSpeed;
     }
 
