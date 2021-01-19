@@ -104,6 +104,7 @@ public:
     Vec3 DragVTail = {0,0,0};
     Vec3 DragHTail = {0,0,0};
 
+    // apply one flight dynamic change
     void CalWingLift(int Pos)// pos 0 for left and 1 for right
     {
         double correctedAOAWing = AngleOfAttack + 2 + 3 * flap_states;
@@ -116,15 +117,18 @@ public:
             correctedAOAWing = correctedAOAWing + 360;
         }
         int temp = 0;
+        double deltaAoa  = (Angle_v_Roll * 4) / FlowSpeed.x;
         if (Angle_v_Roll < 0)
         {
             if (Pos == 0)
             {
                 temp = 1;
+                correctedAOAWing = correctedAOAWing + deltaAoa;
             }
             else
             {
                 temp = -1;
+                correctedAOAWing = correctedAOAWing - deltaAoa;
             }
         }
         else
@@ -132,10 +136,12 @@ public:
             if (Pos == 0)
             {
                 temp = -1;
+                correctedAOAWing = correctedAOAWing - deltaAoa;
             }
             else
             {
                 temp = 1;
+                correctedAOAWing = correctedAOAWing + deltaAoa;
             }
         }
         
@@ -149,7 +155,7 @@ public:
             WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::wingArea * (getClfromAOA(correctedAOAWing) - AlieronPos * 0.02); 
         }
         LiftForceWing[Pos].z = 0; //WingLift * WindAround.z / FlowSpeed; this part is not for lift
-        LiftForceWing[Pos].y = WingLift * WindAround.x / FlowSpeed + temp  * AirDensity * (4.5 * Angle_v_Roll) * (4.5 * Angle_v_Roll) * 1 * A6EBaseAeroData::wingArea;
+        LiftForceWing[Pos].y = WingLift * WindAround.x / FlowSpeed + temp  * AirDensity * (4.5 * Angle_v_Roll) * (4.5 * Angle_v_Roll) * 1.5 * A6EBaseAeroData::wingArea;
         LiftForceWing[Pos].x = - WingLift * WindAround.y / FlowSpeed;
     }
 
@@ -165,15 +171,18 @@ public:
             correctedAOAWing = correctedAOAWing + 360;
         }
         int temp = 0;
+        double deltaAoa  = (Angle_v_Pitch * 7.5) / FlowSpeed.x;
         if (Angle_v_Pitch > 0)
         {
             temp = 1;
+            correctedAOAWing -= deltaAoa;
         }
         else
         {
             temp = -1;
+            correctedAOAWing += deltaAoa;
         }
-        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::HorizontalTailArea * getClfromAOA(correctedAOAWing) - temp * AirDensity * (8.5 * Angle_v_Pitch) * (8.5 * Angle_v_Pitch) * 300 * getCdfromAOA(90 - fabs(correctedAOAWing),0) * A6EBaseAeroData::HorizontalTailArea;
+        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::HorizontalTailArea * getClfromAOA(correctedAOAWing) - temp * AirDensity * (8.5 * Angle_v_Pitch) * (8.5 * Angle_v_Pitch) * 0.5 * getCdfromAOA(90 - fabs(correctedAOAWing),0) * A6EBaseAeroData::HorizontalTailArea;
         LiftForceHTail.z = 0; //WingLift * WindAround.z / FlowSpeed; this part wont gene lift
         LiftForceHTail.y = WingLift * WindAround.x / FlowSpeed;
         LiftForceHTail.x = - WingLift * WindAround.y / FlowSpeed;
@@ -190,16 +199,19 @@ public:
         {
             correctedAOAWing = correctedAOAWing + 360;
         }
-        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::VerticalTailArea * (getClfromAOA(correctedAOAWing) * 0.9);
         int temp = 0;
+        double deltaAoa  = (Angle_v_Yaw * 8.5 - 2 * Angle_v_Roll ) / FlowSpeed.x;
         if (Angle_v_Yaw * 8.5 - Angle_v_Roll * 2 > 0)
         {
             temp = 1;
+            correctedAOAWing -= deltaAoa;
         }
         else
         {
             temp = -1;
+             correctedAOAWing += deltaAoa;
         }
+        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::VerticalTailArea * (getClfromAOA(correctedAOAWing) * 0.9);
         LiftSideForceVTail.y = 0; //WingLift * WindAround.y / FlowSpeed; this part wont have lift
         LiftSideForceVTail.z = WingLift * WindAround.x / FlowSpeed - temp * AirDensity * (8.5 * Angle_v_Yaw - 2 * Angle_v_Roll) * (8.5 * Angle_v_Yaw - 2 * Angle_v_Roll) * 180 * A6EBaseAeroData::VerticalTailArea;
         LiftSideForceVTail.x = - WingLift * WindAround.z / FlowSpeed;
