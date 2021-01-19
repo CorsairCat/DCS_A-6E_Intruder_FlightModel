@@ -117,18 +117,18 @@ public:
             correctedAOAWing = correctedAOAWing + 360;
         }
         int temp = 0;
-        double deltaAoa  = (Angle_v_Roll * 4) / FlowSpeed.x;
+        double deltaAoa  = (Angle_v_Roll * 4) / WindAround.x;
         if (Angle_v_Roll < 0)
         {
             if (Pos == 0)
             {
                 temp = 1;
-                correctedAOAWing = correctedAOAWing + deltaAoa;
+                correctedAOAWing = correctedAOAWing - deltaAoa;
             }
             else
             {
                 temp = -1;
-                correctedAOAWing = correctedAOAWing - deltaAoa;
+                correctedAOAWing = correctedAOAWing + deltaAoa;
             }
         }
         else
@@ -144,7 +144,8 @@ public:
                 correctedAOAWing = correctedAOAWing + deltaAoa;
             }
         }
-        
+        deltaAoa = (Angle_v_Pitch * 0.3) / WindAround.x;
+        correctedAOAWing += deltaAoa;
         double WingLift = 0;
         if (Pos == 0)
         {
@@ -171,18 +172,18 @@ public:
             correctedAOAWing = correctedAOAWing + 360;
         }
         int temp = 0;
-        double deltaAoa  = (Angle_v_Pitch * 7.5) / FlowSpeed.x;
+        double deltaAoa  = (Angle_v_Pitch * 8) / WindAround.x;
         if (Angle_v_Pitch > 0)
         {
             temp = 1;
-            correctedAOAWing -= deltaAoa;
+            correctedAOAWing += deltaAoa;
         }
         else
         {
             temp = -1;
             correctedAOAWing += deltaAoa;
         }
-        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::HorizontalTailArea * getClfromAOA(correctedAOAWing) - temp * AirDensity * (8.5 * Angle_v_Pitch) * (8.5 * Angle_v_Pitch) * 0.5 * getCdfromAOA(90 - fabs(correctedAOAWing),0) * A6EBaseAeroData::HorizontalTailArea;
+        double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::HorizontalTailArea * getClfromAOA(correctedAOAWing) - temp * AirDensity * (8.5 * Angle_v_Pitch) * (8.5 * Angle_v_Pitch) * 280 * getCdfromAOA(90 - fabs(correctedAOAWing),0) * A6EBaseAeroData::HorizontalTailArea;
         LiftForceHTail.z = 0; //WingLift * WindAround.z / FlowSpeed; this part wont gene lift
         LiftForceHTail.y = WingLift * WindAround.x / FlowSpeed;
         LiftForceHTail.x = - WingLift * WindAround.y / FlowSpeed;
@@ -200,7 +201,7 @@ public:
             correctedAOAWing = correctedAOAWing + 360;
         }
         int temp = 0;
-        double deltaAoa  = (Angle_v_Yaw * 8.5 - 2 * Angle_v_Roll ) / FlowSpeed.x;
+        double deltaAoa  = (Angle_v_Yaw * 8.5 - 2 * Angle_v_Roll ) / WindAround.x;
         if (Angle_v_Yaw * 8.5 - Angle_v_Roll * 2 > 0)
         {
             temp = 1;
@@ -209,11 +210,11 @@ public:
         else
         {
             temp = -1;
-             correctedAOAWing += deltaAoa;
+             correctedAOAWing -= deltaAoa;
         }
         double WingLift = 0.5 * AirDensity * FlowSpeed * FlowSpeed * A6EBaseAeroData::VerticalTailArea * (getClfromAOA(correctedAOAWing) * 0.9);
         LiftSideForceVTail.y = 0; //WingLift * WindAround.y / FlowSpeed; this part wont have lift
-        LiftSideForceVTail.z = WingLift * WindAround.x / FlowSpeed - temp * AirDensity * (8.5 * Angle_v_Yaw - 2 * Angle_v_Roll) * (8.5 * Angle_v_Yaw - 2 * Angle_v_Roll) * 1.5 * A6EBaseAeroData::VerticalTailArea;
+        LiftSideForceVTail.z = WingLift * WindAround.x / FlowSpeed - temp * AirDensity * (8.5 * Angle_v_Yaw - 2 * Angle_v_Roll) * (8.5 * Angle_v_Yaw - 2 * Angle_v_Roll) * 360 * A6EBaseAeroData::VerticalTailArea;
         LiftSideForceVTail.x = - WingLift * WindAround.z / FlowSpeed;
     }
 

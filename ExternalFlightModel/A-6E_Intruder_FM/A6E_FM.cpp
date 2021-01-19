@@ -960,7 +960,7 @@ void ed_fm_hot_start_in_air()
 
 bool ed_fm_enable_debug_info()
 {
-	return true;
+	return false;
 }
 
 size_t ed_fm_debug_watch(int level, char *buffer, size_t maxlen)

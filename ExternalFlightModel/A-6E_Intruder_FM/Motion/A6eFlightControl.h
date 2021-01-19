@@ -12,11 +12,11 @@ private:
     double desiredPitch = 0;
     double desiredRoll = 0;
     double desiredYaw = 0;
-    double moveMaxRate = 0.2;
+    double moveMaxRate = 0.1;
     double LastStickRollInput = 0;
     double LastStickYawInput = 0;
     double LastStickPitchInput = 0;
-    double moveRateManual = 0.006; 
+    double moveRateManual = 0.002; 
 public:
     int inputRollKeyboard = 0;
     int inputPitchKeyboard = 0;
